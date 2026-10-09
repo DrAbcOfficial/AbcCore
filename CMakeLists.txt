@@ -8,6 +8,7 @@ set(ABC_METAHOOK_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/MetaHook/in
 
 add_library(abc_core STATIC
     src/Core.cpp
+    src/Math.cpp
 )
 add_library(Abc::Core ALIAS abc_core)
 

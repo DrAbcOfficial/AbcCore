@@ -10,3 +10,6 @@
 [submodule "thirdparty/AIGCJson"]
 	path = thirdparty/AIGCJson
 	url = https://github.com/AIGMix/AIGCJson
+[submodule "thirdparty/SteamSDK"]
+	path = thirdparty/SteamSDK
+	url = https://github.com/MetaHookSv/SteamSDK
