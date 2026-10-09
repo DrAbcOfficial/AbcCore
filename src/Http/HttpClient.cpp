@@ -3,8 +3,7 @@
 // vgui::filesystem() to the engine IFileSystem.
 #include <abc/Plugin.h>
 #include <abc/Console.h>
-
-#include "HttpClient.h"
+#include <abc/Http/HttpClient.h>
 
 namespace abc {
 

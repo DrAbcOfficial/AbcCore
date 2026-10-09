@@ -69,12 +69,12 @@ public:
 	}
 	template <typename F, typename... Args>
 	CHttpClientItem* OnDestroy(F&& func, Args&&... args) {
-		m_pOnDestory = std::bind(std::forward<F>(func), std::placeholders::_1, std::forward<Args>(args)...);
+		m_pOnDestory = std::bind(std::forward<F>(func), std::forward<Args>(args)...);
 		return this;
 	}
 	template <typename F, typename... Args>
 	CHttpClientItem* OnFinish(F&& func, Args&&... args) {
-		m_pOnFinish = std::bind(std::forward<F>(func), std::placeholders::_1, std::forward<Args>(args)...);
+		m_pOnFinish = std::bind(std::forward<F>(func), std::forward<Args>(args)...);
 		return this;
 	}
 	/// <param name="func">first args must be HTTPCLIENT_FAILED_CODE</param>
