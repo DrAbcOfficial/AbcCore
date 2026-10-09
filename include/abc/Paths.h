@@ -4,6 +4,10 @@
 // Collects the scattered gamedir concatenation logic from ABCEnchance
 // src/plugins.cpp (CheckAsset) and config paths. All paths are mod-relative
 // ("svencoop/" working dir): "abcenchance/config.json" etc.
+//
+// NOTE: the engine returns the mod directory RELATIVE ("svencoop", see plan 08
+// §4.11), so GameDir()/ModPath() resolve against the process CWD; the host
+// game must be launched with the game root as CWD (the fixed launch in 08 §3).
 
 #ifndef ABC_PATHS_H
 #define ABC_PATHS_H

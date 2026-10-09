@@ -37,9 +37,10 @@ void CTaskManager::CheckAll(){
 	for (auto iter = m_aryList.begin(); iter != m_aryList.end();) {
 		auto item = *iter;
 		if (item->IsReady()) {
-			// Move the continuation out before deleting the item, so the
-			// bound result reference survives the destructor (it runs the
-			// worker thread join) and no stack unwind touches it.
+			// GetCaller() binds the result by value, so the returned callable
+			// is self-contained; pull it out before deleting the item (the
+			// destructor joins the worker thread) and invoke after, keeping
+			// the continuation free of any state owned by the item.
 			auto caller = std::move(item->GetCaller());
 			delete item;
 			iter = m_aryList.erase(iter);
