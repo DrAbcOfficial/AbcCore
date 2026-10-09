@@ -60,7 +60,11 @@ CChainedCommand::CChainedCommand(const char* cmdName) {
 			break;
 		}
 	}
-	m_pfnOriginal = g_pMetaHookAPI->HookCmd(m_szName, kThunks[m_iSlot]);
+	// HookCmd only re-wires commands that already exist (NULL otherwise);
+	// a hooked-but-unknown command stays inert: subscribers run, nothing is
+	// chained through.
+	if (m_iSlot >= 0)
+		m_pfnOriginal = g_pMetaHookAPI->HookCmd(m_szName, kThunks[m_iSlot]);
 }
 
 CChainedCommand::~CChainedCommand() {
