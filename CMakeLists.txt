@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 
 project(AbcCore LANGUAGES CXX)
 
-include(cmake/AbcCommon.cmake)
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/AbcCommon.cmake")
 
 set(ABC_METAHOOK_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/MetaHook/include")
 
