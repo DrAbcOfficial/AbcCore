@@ -23,6 +23,8 @@ bool WriteJsonFile(const char* relativePath, const std::string& json);
 
 // Typed helpers for AIGC_JSON_HELPER structs. Missing file is not an error
 // (first run); parse failures warn through abc::ConsoleWarn and return false.
+// JsonSave takes a non-const reference because AIGCJson's serializer API
+// (ObjectToJson) is non-const.
 template <typename T>
 bool JsonLoad(T& cfg, const char* relativePath) {
 	std::string json;
@@ -36,7 +38,7 @@ bool JsonLoad(T& cfg, const char* relativePath) {
 }
 
 template <typename T>
-bool JsonSave(const T& cfg, const char* relativePath) {
+bool JsonSave(T& cfg, const char* relativePath) {
 	std::string json;
 	if (!aigc::JsonHelper::ObjectToJson(cfg, json)) {
 		ConsoleWarn("Couldn't serialize config for %s\n", relativePath);
