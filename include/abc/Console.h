@@ -1,0 +1,27 @@
+#pragma once
+
+// abc::Console - engine console output helpers.
+// Replaces ABCEnchance src/utility/util.cpp ConsoleWriteline and the colored
+// GameConsole prints (VGUI2/GameUI/GameConsole.cpp) that old core modules
+// called via extern - core code must not depend on UI, so the colored variants
+// degrade to plain text with a tag prefix here.
+
+#ifndef ABC_CONSOLE_H
+#define ABC_CONSOLE_H
+
+namespace abc {
+
+// Raw Con_Printf passthrough.
+void ConsolePrint(const char* fmt, ...);
+// Plain-text warning ("[abc] WARNING: " prefix). Replaces ConsoleWarnMessage /
+// GameConsole warn prints.
+void ConsoleWarn(const char* fmt, ...);
+// Plain-text error ("[abc] ERROR: " prefix). Replaces GameConsole error prints.
+void ConsoleError(const char* fmt, ...);
+// Legacy helper: prints the string as-is (no newline, no formatting) -
+// kept name-compatible with ABCEnchance ConsoleWriteline.
+void ConsoleWriteline(const char* text);
+
+}
+
+#endif //ABC_CONSOLE_H
