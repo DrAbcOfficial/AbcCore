@@ -20,6 +20,7 @@ target_include_directories(abc_core
         "${ABC_METAHOOK_INCLUDE_DIR}/HLSDK/cl_dll"
         "${ABC_METAHOOK_INCLUDE_DIR}/HLSDK/engine"
         "${ABC_METAHOOK_INCLUDE_DIR}/HLSDK/pm_shared"
+        "${ABC_METAHOOK_INCLUDE_DIR}/HLSDK/public"
         "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Renderer/include"
 )
 
