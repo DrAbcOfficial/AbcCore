@@ -14,6 +14,10 @@ bool CTaskManager::Has(ITaskItem* check){
 		if ((*iter) == check)
 			return true;
 	}
+	for (auto iter = m_aryPending.begin(); iter != m_aryPending.end(); iter++) {
+		if ((*iter) == check)
+			return true;
+	}
 	return false;
 }
 void CTaskManager::Shutdown() {

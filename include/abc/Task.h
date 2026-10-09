@@ -63,6 +63,10 @@ public:
 	}
 	//get caller
 	virtual std::function<void()> GetCaller() override {
+		// A task started without ContinueWith (fire-and-forget) yields a
+		// no-op, so CheckAll never std::invoke()s an empty std::function.
+		if (!m_pContinue)
+			return []() {};
 		return std::bind(m_pContinue, m_pValue);
 	}
 private:
@@ -80,7 +84,7 @@ public:
 		m_aryPending.push_back(item);
 		return item;
 	}
-	//has this task?
+	//has this task? (checks pending and in-flight)
 	bool Has(ITaskItem* check);
 	//check per frame
 	void CheckAll();

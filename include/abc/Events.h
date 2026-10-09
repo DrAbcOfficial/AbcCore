@@ -37,6 +37,13 @@ public:
 	explicit CChainedCommand(const char* cmdName);
 	~CChainedCommand();
 
+	// Instances register their own address in the slot table at hook time;
+	// copying/moving would leave that slot pointing at the wrong object.
+	CChainedCommand(const CChainedCommand&) = delete;
+	CChainedCommand& operator=(const CChainedCommand&) = delete;
+	CChainedCommand(CChainedCommand&&) = delete;
+	CChainedCommand& operator=(CChainedCommand&&) = delete;
+
 	Callback& Event() { return m_event; }
 
 	const char* Name() const { return m_szName; }
@@ -53,8 +60,9 @@ private:
 	Callback m_event;
 };
 
-// Run fn on the main thread at the next task-manager pump (host plugin pumps
-// abc::GetTaskManager()->CheckAll() per frame). Fire-and-forget.
+// Run fn on the main thread shortly after this call: it is queued through the
+// task manager, and the host plugin must pump abc::GetTaskManager()->CheckAll()
+// per frame (HUD_Frame) for it to run. Fire-and-forget.
 void DispatchToMainThread(std::function<void()> fn);
 
 }

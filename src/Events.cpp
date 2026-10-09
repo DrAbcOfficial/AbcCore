@@ -4,6 +4,7 @@
 #include <metahook.h>
 
 #include <abc/Events.h>
+#include <abc/Console.h>
 #include <abc/Task.h>
 
 #include <cstring>
@@ -63,8 +64,12 @@ CChainedCommand::CChainedCommand(const char* cmdName) {
 	// HookCmd only re-wires commands that already exist (NULL otherwise);
 	// a hooked-but-unknown command stays inert: subscribers run, nothing is
 	// chained through.
-	if (m_iSlot >= 0)
+	if (m_iSlot >= 0) {
 		m_pfnOriginal = g_pMetaHookAPI->HookCmd(m_szName, kThunks[m_iSlot]);
+	} else {
+		ConsoleWarn("CChainedCommand: slot table full (%zu), \"%s\" left unhooked\n",
+			kMaxInstances, m_szName);
+	}
 }
 
 CChainedCommand::~CChainedCommand() {
@@ -89,11 +94,14 @@ void CChainedCommand::RunChain() {
 }
 
 void DispatchToMainThread(std::function<void()> fn) {
-	GetTaskManager()->Add<int>([fn]() -> int {
-		if (fn)
-			fn();
-		return 0;
-	});
+	// The task body itself is a no-op on the worker thread; the payload rides
+	// the continuation, which the host plugin runs on the main thread when it
+	// pumps GetTaskManager()->CheckAll() (per frame).
+	GetTaskManager()->Add<int>([]() -> int { return 0; })
+		->ContinueWith([fn](int&) {
+			if (fn)
+				fn();
+		});
 }
 
 }
