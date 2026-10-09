@@ -125,6 +125,8 @@ void Sys_GetRegKeyValueUnderRoot(HKEY rootKey, const char* pszSubKey, const char
 	DWORD dwType;
 	DWORD dwSize;
 	snprintf(pszReturnString, nReturnLength, "%s", pszDefaultValue);
+	if (nReturnLength > (int)sizeof(szBuff))
+		nReturnLength = (int)sizeof(szBuff); // szBuff below can't hold more
 	lResult = RegCreateKeyExA(
 		rootKey,
 		pszSubKey,

@@ -67,16 +67,22 @@ CCvarRegistrar* CCvarRegistrar::Get() {
 
 cvar_t* CCvarRegistrar::Create(const char* name, const char* def, int flags, cvar_callback_t callback) {
 	cvar_t* cvar = CREATE_CVAR(name, def, flags, callback);
-	if (cvar && m_nCount < kMaxCvars) {
-		m_aryCvars[m_nCount].CVar = cvar;
-		m_nCount++;
+	if (cvar) {
+		if (m_nCount < kMaxCvars) {
+			m_aryCvars[m_nCount].CVar = cvar;
+			m_nCount++;
+		} else {
+			// Registration still happened; only the debug listing misses it.
+			ConsoleWarn("CCvarRegistrar: table full (%zu), \"%s\" not tracked\n", kMaxCvars, name);
+		}
 	}
 	return cvar;
 }
 
 void CCvarRegistrar::ListAll() {
 	for (size_t i = 0; i < m_nCount; i++) {
-		ConsolePrint("  %s = \"%s\"\n", m_aryCvars[i].CVar->name, m_aryCvars[i].CVar->string);
+		cvar_t* cvar = m_aryCvars[i].CVar;
+		ConsolePrint("  %s = \"%s\"\n", cvar->name, cvar->string ? cvar->string : "");
 	}
 	ConsolePrint("[abc] %zu cvar(s) registered\n", m_nCount);
 }
