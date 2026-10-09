@@ -13,6 +13,18 @@ mh_interface_t* g_pInterface = nullptr;
 cl_enginefunc_t gEngfuncs = {};
 metahook_api_t* g_pMetaHookAPI = nullptr;
 mh_enginesave_t* g_pMetaSave = nullptr;
+cl_exportfuncs_t gExportfuncs = {};
+
+// IPluginsV4 declares its virtuals without definitions (each plugin was
+// expected to implement them directly in the old layout). Now that
+// CAbcPluginBase derives and overrides them all, MSVC still emits references
+// to the base entries while building construction/destruction vtables.
+void IPluginsV4::Init(metahook_api_t*, mh_interface_t*, mh_enginesave_t*) {}
+void IPluginsV4::Shutdown(void) {}
+void IPluginsV4::LoadEngine(cl_enginefunc_t*) {}
+void IPluginsV4::LoadClient(cl_exportfuncs_t*) {}
+void IPluginsV4::ExitGame(int) {}
+const char* IPluginsV4::GetVersion(void) { return ""; }
 
 namespace abc {
 
