@@ -80,8 +80,17 @@ CChainedCommand::~CChainedCommand() {
 }
 
 void CChainedCommand::DispatchSlot(size_t slot) {
-	if (slot < kMaxInstances && s_Slots[slot])
+	if (slot < kMaxInstances && s_Slots[slot]) {
 		s_Slots[slot]->RunChain();
+		return;
+	}
+	// A thunk whose command object was destroyed lands here (MetaHook has no
+	// HookCmd uninstall). Warn once: a dead binding must not vanish silently.
+	static bool WarnedDeadThunk = false;
+	if (!WarnedDeadThunk) {
+		WarnedDeadThunk = true;
+		ConsoleWarn("CChainedCommand: command fired on a freed slot, binding dropped\n");
+	}
 }
 
 void CChainedCommand::RunChain() {
