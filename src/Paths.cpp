@@ -6,22 +6,22 @@
 
 namespace abc {
 
-static std::string s_szGameDir;
-static bool s_bWarnedNoGameDir = false;
+static std::string CachedGameDir;
+static bool WarnedNoGameDir = false;
 
 const char* GameDir() {
-	if (s_szGameDir.empty()) {
+	if (CachedGameDir.empty()) {
 		const char* dir = g_pMetaHookAPI ? g_pMetaHookAPI->GetGameDirectory() : nullptr;
 		if (dir && *dir)
-			s_szGameDir = dir;
-		else if (!s_bWarnedNoGameDir) {
+			CachedGameDir = dir;
+		else if (!WarnedNoGameDir) {
 			// Paths will silently degrade to process-CWD-relative until the
 			// engine dir is available; usually means "called too early".
-			s_bWarnedNoGameDir = true;
+			WarnedNoGameDir = true;
 			ConsoleWarn("GameDir not available yet, paths stay CWD-relative\n");
 		}
 	}
-	return s_szGameDir.c_str();
+	return CachedGameDir.c_str();
 }
 
 std::string ModPath(const char* relativePath) {
