@@ -1,9 +1,12 @@
 // Ported from ABCEnchance src/core/library/httpclient.cpp.
 // SYS_ERROR -> abc::SysError; cookie jar file IO moved from
-// vgui::filesystem() to the engine IFileSystem.
+// vgui::filesystem() to the engine IFileSystem. R-16 ownership contract
+// reworked per D-17 (see CheckAll/Interrupt/Interrupt comments).
 #include <abc/Plugin.h>
 #include <abc/Console.h>
 #include <abc/Http/HttpClient.h>
+
+#include <cstring>
 
 namespace abc {
 
@@ -52,9 +55,15 @@ void CHttpClient::ShutDown(){
 	g_pHttpClient.ClearAll();
 }
 void CHttpClient::CheckAll(){
+	// R-16 ownership contract (D-17): the request's Destroy() callback is the
+	// single deletion authority. The HTTP thread invokes the callbacks, so a
+	// synchronous delete from Interrupt() (the old shape) raced them - the
+	// item now dies here, on the frame thread, only after DESTORYED arrived.
+	// EXCEPTIONED is NOT terminal (the request still fires Destroy on its
+	// auto-destruct); sweeping on it UAF'd the late Destroy() callback.
 	for (auto iter = m_aryItems.begin(); iter != m_aryItems.end();) {
 		auto item = *iter;
-		if (item->GetState() == HTTPCLIENT_STATE::DESTORYED || item->GetState() == HTTPCLIENT_STATE::EXCEPTIONED) {
+		if (item->GetState() == HTTPCLIENT_STATE::DESTORYED) {
 			delete item;
 			iter = m_aryItems.erase(iter);
 		}
@@ -85,21 +94,17 @@ CHttpClientItem* CHttpClient::Fetch(httpContext_s* ctx){
 	m_aryItems.push_back(item);
 	return item;
 }
-// AUDIT BEFORE ENABLING (the module has no consumer yet): item->Interrupt()
-// destroys the underlying request, whose completion callbacks fire on the
-// HTTP thread and touch the same item - the unconditional delete below can
-// race them (use-after-free), and SetAutoDestroyOnFinish adds a second
-// destroy path. Rework the ownership contract (e.g. defer the delete into
-// the item's own destroy callback) before the first real call site lands.
+// R-16 ownership contract (D-17): Interrupt only tears the underlying
+// request down; the Destroy() callback (HTTP thread) marks the item
+// DESTORYED and the next CheckAll() reclaims it on the frame thread. The
+// old unconditional delete here raced the post-destroy callbacks
+// (use-after-free).
 bool CHttpClient::Interrupt(CHttpClientItem* pDestory){
 	for (auto iter = m_aryItems.begin(); iter != m_aryItems.end();) {
 		auto item = *iter;
 		if (item == pDestory) {
-			bool state = item->Interrupt();
-			if (state) {
-				delete item;
-				iter = m_aryItems.erase(iter);
-			}
+			const bool state = item->Interrupt();
+			iter++;
 			return state;
 		}
 		else
@@ -190,7 +195,10 @@ HTTPCLIENT_STATE CHttpClientItem::GetState() const{
 	return m_iStatue;
 }
 bool CHttpClientItem::Interrupt(){
-	if (!m_pRequest)
+	// R-16: idempotent - a second call after the request self-destructed must
+	// not touch the dangling m_pRequest (the request owns its own lifetime
+	// via SetAutoDestroyOnFinish; Destroy() below is its teardown trigger).
+	if (!m_pRequest || m_iStatue == HTTPCLIENT_STATE::DESTORYED)
 		return false;
 	m_pRequest->Destroy();
 	return true;

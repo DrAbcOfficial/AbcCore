@@ -9,6 +9,18 @@
 // UtilHTTPClient_libcurl.dll to be loaded by the game. No current consumer;
 // kept verbatim (namespace abc, SYS_ERROR -> abc::SysError, cookie jar moved
 // from vgui::filesystem() to the engine IFileSystem) for future use.
+//
+// Ownership contract (R-16 rework, D-17): the underlying request owns its
+// lifetime (SetAutoDestroyOnFinish) and its Destroy() callback is the item's
+// single deletion authority - it fires on the HTTP THREAD, so:
+//   - never delete a CHttpClientItem outside CHttpClient::CheckAll() (frame
+//     thread, sweeps DESTORYED items);
+//   - Interrupt() only tears the request down, the item is reclaimed later;
+//   - the OnDestroy/OnFailed/OnResponse callbacks run on the HTTP thread -
+//     hop to the frame thread (abc::DispatchToMainThread) before touching
+//     game state.
+// ClearAll() is the one synchronous path and must only run after the client
+// itself is torn down (CHttpClient::ShutDown order).
 
 #ifndef ABC_HTTPCLIENT_H
 #define ABC_HTTPCLIENT_H
