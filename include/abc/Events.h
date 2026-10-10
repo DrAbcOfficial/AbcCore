@@ -14,6 +14,10 @@
 
 #include <functional>
 
+// Platform header (xcommand_t for CChainedCommand) - the header must be
+// self-sufficient, consumers must not rely on including metahook.h first.
+#include <metahook.h>
+
 namespace abc {
 
 // Shared vocabulary so plugins don't include eventpp headers directly.

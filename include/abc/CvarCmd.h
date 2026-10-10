@@ -9,6 +9,9 @@
 #ifndef ABC_CVARCMD_H
 #define ABC_CVARCMD_H
 
+// Platform header first (cvar_callback_t lives here) - the header must be
+// self-sufficient, consumers must not rely on including metahook.h first.
+#include <metahook.h>
 #include <cvardef.h>
 
 namespace abc {
