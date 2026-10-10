@@ -18,8 +18,9 @@ void ConsolePrint(const char* fmt, ...);
 void ConsoleWarn(const char* fmt, ...);
 // Plain-text error ("[abc] ERROR: " prefix). Replaces GameConsole error prints.
 void ConsoleError(const char* fmt, ...);
-// Legacy helper: prints the string as-is (no newline, no formatting) -
-// kept name-compatible with ABCEnchance ConsoleWriteline.
+// Raw-string print: text is emitted as-is (no printf interpretation, no
+// newline added) - the safe entry for dynamic strings; ConsolePrint is
+// printf-style and must never take a runtime string as its format.
 void ConsoleWriteline(const char* text);
 
 }

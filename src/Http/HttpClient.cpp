@@ -85,6 +85,12 @@ CHttpClientItem* CHttpClient::Fetch(httpContext_s* ctx){
 	m_aryItems.push_back(item);
 	return item;
 }
+// AUDIT BEFORE ENABLING (the module has no consumer yet): item->Interrupt()
+// destroys the underlying request, whose completion callbacks fire on the
+// HTTP thread and touch the same item - the unconditional delete below can
+// race them (use-after-free), and SetAutoDestroyOnFinish adds a second
+// destroy path. Rework the ownership contract (e.g. defer the delete into
+// the item's own destroy callback) before the first real call site lands.
 bool CHttpClient::Interrupt(CHttpClientItem* pDestory){
 	for (auto iter = m_aryItems.begin(); iter != m_aryItems.end();) {
 		auto item = *iter;

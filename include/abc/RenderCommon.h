@@ -8,6 +8,11 @@
 // without re-syncing; the check-rendercommon-sync build step fails on drift.
 // The only adaptations are this header comment, the include guard, and the
 // minimal GL type shim standing in for qgl.h (no GLEW dependency).
+//
+// NOTE: the sync check compares from the OFFSET macro line onwards. The GL
+// shim block right below (4 typedefs + 5 GL_* format constants) has no
+// upstream counterpart and is therefore OUTSIDE the drift check - verify it
+// by hand against GL headers if the Renderer ever changes its qgl.h usage.
 
 #ifndef ABC_RENDERCOMMON_H
 #define ABC_RENDERCOMMON_H

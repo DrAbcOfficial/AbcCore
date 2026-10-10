@@ -54,6 +54,8 @@ public:
 		return this;
 	}
 	//start task
+	// No-op: the thread already starts in the constructor. Kept so the
+	// fluent chain Add(...)->Start()->ContinueWith(...) still reads naturally.
 	virtual CTaskItem* Start() override {
 		return this;
 	}

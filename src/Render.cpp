@@ -41,7 +41,9 @@ void MetaRendererInit()
 
 void MetaRendererShutdown()
 {
-	//Never unload by ourself!
+	//Never unload by ourself! Only the module-handle bookkeeping is dropped;
+	//g_pMetaRenderer intentionally stays - the Renderer module is owned by
+	//the host, and teardown paths may still call MetaRenderer() after this.
 	if (g_hMetaRenderer)
 	{
 		g_hMetaRenderer = NULL;
