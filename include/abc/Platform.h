@@ -4,6 +4,10 @@
 // Ported from ABCEnchance src/core/library/win32helper.h/.cpp (namespace-wrapped,
 // proper <windows.h> include added - the old header relied on include order).
 // HICON->RGBA conversion is kept for AbcUi's future use.
+//
+// DORMANT MODULE: no consumer inside the three repos yet. Re-audit the
+// registry parsing (Win32GetFileIconByExtension) against real registry data
+// before wiring the first call site.
 
 #ifndef ABC_PLATFORM_H
 #define ABC_PLATFORM_H

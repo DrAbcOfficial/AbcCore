@@ -63,13 +63,21 @@ HICON Win32GetFileIconByExtension(const std::string& extension) {
 		RegCloseKey(hKey);
 		if (iconPath.size() == 0)
 			return NULL;
-		size_t pos = iconPath.find_last_of(',');
-		std::string path = iconPath.substr(0, pos);
-		int index = std::stoi(iconPath.substr(pos + 1));
+		// DefaultIcon value is "path[,index]" - a missing index means icon 0.
+		// Parsed without exceptions: registry strings are untrusted input.
+		std::string path = iconPath;
+		int index = 0;
+		const size_t pos = iconPath.find_last_of(',');
+		if (pos != std::string::npos) {
+			path = iconPath.substr(0, pos);
+			index = static_cast<int>(std::strtol(iconPath.c_str() + pos + 1, nullptr, 10));
+		}
 		char expandedPath[MAX_PATH];
 		ExpandEnvironmentStringsA(path.c_str(), expandedPath, MAX_PATH);
+		wchar_t widePath[MAX_PATH];
+		MultiByteToWideChar(CP_ACP, 0, expandedPath, -1, widePath, MAX_PATH);
 		HICON smallIcon;
-		ExtractIconExW(std::wstring(expandedPath, expandedPath + strlen(expandedPath)).c_str(), index, NULL, &smallIcon, 1);
+		ExtractIconExW(widePath, index, NULL, &smallIcon, 1);
 		return smallIcon;
 	}
 	return NULL;
