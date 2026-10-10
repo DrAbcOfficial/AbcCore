@@ -16,11 +16,6 @@ namespace abc {
 // Client-dll friendly flag combo used by most ABC cvars (was util.h FCVAR_VALUE).
 constexpr int FCVAR_VALUE = (FCVAR_PRINTABLEONLY | FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 
-// Hook an existing engine/client command, keeping the original entry so the
-// wrapper can forward to it (MetaHook HookCmd).
-xcommand_t Q_HOOK_COMMAND(const char* cmd, xcommand_t func);
-#define ABC_HOOK_COMMAND(x, y) abc::Q_HOOK_COMMAND(x, __UserCmd_##y)
-
 void ADD_COMMAND(const char* cmd, void (*pfnEngSrc_function)(void));
 
 cvar_t* CVAR_GET_POINTER(const char* x);

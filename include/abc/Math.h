@@ -147,6 +147,4 @@ public:
 
 }
 
-#define AngleIVectors abc::CMathlib::AngleVectorsTranspose
-
 #endif //ABC_MATH_H
