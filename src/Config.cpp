@@ -1,46 +1,30 @@
-// Ported from ABCEnchance src/core/module/config.cpp. Dependency replacements
-// per plan 03 §2: vgui::filesystem() -> g_pInterface->FileSystem (engine
-// IFileSystem), ConsoleWarnMessage -> abc::ConsoleWarn.
 #include <abc/Config.h>
-#include <abc/Console.h>
 #include <abc/Paths.h>
 #include <abc/Plugin.h>
+#include <abc/detail/ConfigFile.h>
 
 namespace abc {
-
 bool ReadJsonFile(const char* relativePath, std::string& jsonOut) {
-	jsonOut.clear();
-	if (!g_pFileSystem) {
-		ConsoleWarn("Config filesystem not ready (%s)\n", relativePath);
-		return false;
-	}
-	FileHandle_t file = g_pFileSystem->Open(relativePath, "rb");
-	if (!file)
-		return false;
-	unsigned size = g_pFileSystem->Size(file);
-	char* mem = new char[size + 1];
-	int bytesRead = g_pFileSystem->Read(mem, (int)size, file);
-	g_pFileSystem->Close(file);
-	mem[bytesRead] = 0;
-	jsonOut.assign(mem, (size_t)bytesRead);
-	delete[] mem;
-	return true;
+    if (!relativePath || !g_pFileSystem) return false;
+    FileHandle_t file = g_pFileSystem->Open(relativePath, "rb");
+    if (!file) return false;
+    struct CloseFile { FileHandle_t File; ~CloseFile() { g_pFileSystem->Close(File); } } close{file};
+    const unsigned size = g_pFileSystem->Size(file);
+    if (size > detail::MaxConfigBytes) return false;
+    std::string text(size, '\0');
+    const int read = size ? g_pFileSystem->Read(text.data(), static_cast<int>(size), file) : 0;
+    if (read != static_cast<int>(size) || !g_pFileSystem->IsOk(file)) return false;
+    jsonOut = std::move(text);
+    return true;
 }
-
 bool WriteJsonFile(const char* relativePath, const std::string& json) {
-	if (!g_pFileSystem) {
-		ConsoleWarn("Config filesystem not ready (%s)\n", relativePath);
-		return false;
-	}
-	EnsureParentDir(relativePath);
-	FileHandle_t file = g_pFileSystem->Open(relativePath, "wb");
-	if (!file) {
-		ConsoleWarn("Couldn't write config file %s\n", relativePath);
-		return false;
-	}
-	g_pFileSystem->Write(json.data(), (int)json.size(), file);
-	g_pFileSystem->Close(file);
-	return true;
+    // VFileSystem009 has void Flush/Close and no rename/replace operation.
+    // Persist explicitly in the writable mod directory, never through a pack
+    // or alternate read search path. Native sibling replacement preserves old data.
+    if (!relativePath || !*GameDir()) return false;
+    const auto relative = std::filesystem::u8path(relativePath);
+    if (relative.empty() || relative.has_root_path()) return false;
+    for (const auto& part : relative) if (part == "..") return false;
+    return detail::WriteConfigAtomic(std::filesystem::path(GameDir()) / relative, json);
 }
-
 }

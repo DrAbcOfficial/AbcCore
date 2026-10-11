@@ -16,6 +16,7 @@ set(ABC_CORE_SOURCES
     src/CvarCmd.cpp
     src/Task.cpp
     src/Events.cpp
+    src/ConfigFile.cpp
     src/Config.cpp
     src/Paths.cpp
     src/Platform.cpp

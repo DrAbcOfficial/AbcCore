@@ -17,6 +17,10 @@
 
 namespace abc {
 
+// Reads are capped at 4 MiB and preserve jsonOut on failure. Saves use a
+// flushed sibling file and native Win32 atomic replacement, retaining .bak
+// for existing files. Return false on any failure; never truncate the target.
+// Relative paths only; call after GameDir is ready.
 // Raw JSON text under "<mod dir>/<relativePath>".
 bool ReadJsonFile(const char* relativePath, std::string& jsonOut);
 bool WriteJsonFile(const char* relativePath, const std::string& json);
@@ -30,10 +34,12 @@ bool JsonLoad(T& cfg, const char* relativePath) {
 	std::string json;
 	if (!ReadJsonFile(relativePath, json))
 		return false;
-	if (!aigc::JsonHelper::JsonToObject(cfg, json)) {
+	T candidate = cfg; // Preserve omitted-field defaults and caller state on failure.
+	if (!aigc::JsonHelper::JsonToObject(candidate, json)) {
 		ConsoleWarn("Couldn't parse config file %s\n", relativePath);
 		return false;
 	}
+	cfg = std::move(candidate);
 	return true;
 }
 
