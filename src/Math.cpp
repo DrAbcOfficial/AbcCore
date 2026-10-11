@@ -63,9 +63,10 @@ float CMathlib::DotProduct(const vec3_t x, const vec3_t y) {
 	return ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2]);
 }
 void CMathlib::ColorCalcuAlpha(int& r, int& g, int& b, int a) {
-	r *= static_cast<int>((float)(a) / 255);
-	g *= static_cast<int>((float)(a) / 255);
-	b *= static_cast<int>((float)(a) / 255);
+	const float alpha = std::clamp(a, 0, 255) / 255.0f;
+	r = static_cast<int>(r * alpha);
+	g = static_cast<int>(g * alpha);
+	b = static_cast<int>(b * alpha);
 }
 size_t CMathlib::GetScreenPixel(int length, double percent) {
 	return (size_t)((float)length * std::clamp(static_cast<float>(percent), 0.0f, 1.0f));
@@ -74,21 +75,10 @@ void CMathlib::Vector2Rotate(vec2_t out, float x, float y, float rotate) {
 	out[0] = x * cos(rotate) - y * sin(rotate); out[1] = x * sin(rotate) + y * cos(rotate);
 }
 void CMathlib::ProjectPointOnPlane(vec3_t dst, const vec3_t p, const vec3_t normal){
-	float d;
-	vec3_t n;
-	float inv_denom;
-
-	inv_denom = 1.0F / CMathlib::DotProduct(normal, normal);
-
-	d = CMathlib::DotProduct(normal, p) * inv_denom;
-
-	n[0] = normal[0] * inv_denom;
-	n[1] = normal[1] * inv_denom;
-	n[2] = normal[2] * inv_denom;
-
-	dst[0] = p[0] - d * n[0];
-	dst[1] = p[1] - d * n[1];
-	dst[2] = p[2] - d * n[2];
+	const float denominator = DotProduct(normal, normal);
+	const float d = denominator > 0 ? DotProduct(normal, p) / denominator : 0;
+	vec3_t projected = {p[0] - d * normal[0], p[1] - d * normal[1], p[2] - d * normal[2]};
+	VectorCopy(projected, dst);
 }
 void CMathlib::PerpendicularVector(vec3_t dst, const vec3_t src){
 	int pos;
@@ -361,6 +351,7 @@ void CMathlib::VectorScale(const vec3_t in, vec_t scale, vec3_t out){
 	out[2] = in[2] * scale;
 }
 int CMathlib::Q_log2(int val){
+	if (val <= 0) return 0;
 	int answer = 0;
 
 	while (val >>= 1)
@@ -709,6 +700,8 @@ void CMathlib::SinCos(float radians, float *sine, float *cosine){
 	*cosine = cosf(radians);
 }
 void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4], const vec3_t angles, const vec3_t origin, float scale){
+	out[3][0] = out[3][1] = out[3][2] = 0;
+	out[3][3] = 1;
 	float	angle, sr, sp, sy, cr, cp, cy;
 	if (angles[Q_ROLL]){
 		angle = angles[Q_YAW] * (mathlib::F_PI * 2 / 360.0f);
@@ -783,18 +776,15 @@ void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4], const vec3_t angles, 
 	}
 }
 void CMathlib::Matrix4x4_ConcatTransforms(float out[4][4], float in1[4][4], float in2[4][4]){
-	out[0][0] = in1[0][0] * in2[0][0] + in1[0][1] * in2[1][0] + in1[0][2] * in2[2][0];
-	out[0][1] = in1[0][0] * in2[0][1] + in1[0][1] * in2[1][1] + in1[0][2] * in2[2][1];
-	out[0][2] = in1[0][0] * in2[0][2] + in1[0][1] * in2[1][2] + in1[0][2] * in2[2][2];
-	out[0][3] = in1[0][0] * in2[0][3] + in1[0][1] * in2[1][3] + in1[0][2] * in2[2][3] + in1[0][3];
-	out[1][0] = in1[1][0] * in2[0][0] + in1[1][1] * in2[1][0] + in1[1][2] * in2[2][0];
-	out[1][1] = in1[1][0] * in2[0][1] + in1[1][1] * in2[1][1] + in1[1][2] * in2[2][1];
-	out[1][2] = in1[1][0] * in2[0][2] + in1[1][1] * in2[1][2] + in1[1][2] * in2[2][2];
-	out[1][3] = in1[1][0] * in2[0][3] + in1[1][1] * in2[1][3] + in1[1][2] * in2[2][3] + in1[1][3];
-	out[2][0] = in1[2][0] * in2[0][0] + in1[2][1] * in2[1][0] + in1[2][2] * in2[2][0];
-	out[2][1] = in1[2][0] * in2[0][1] + in1[2][1] * in2[1][1] + in1[2][2] * in2[2][1];
-	out[2][2] = in1[2][0] * in2[0][2] + in1[2][1] * in2[1][2] + in1[2][2] * in2[2][2];
-	out[2][3] = in1[2][0] * in2[0][3] + in1[2][1] * in2[1][3] + in1[2][2] * in2[2][3] + in1[2][3];
+	float result[4][4] = {};
+	for (int row = 0; row < 3; ++row) {
+		for (int col = 0; col < 4; ++col) {
+			for (int k = 0; k < 3; ++k) result[row][col] += in1[row][k] * in2[k][col];
+			if (col == 3) result[row][col] += in1[row][3];
+		}
+	}
+	result[3][3] = 1;
+	std::memcpy(out, result, sizeof(result));
 }
 void CMathlib::ConcatTransforms(float in1[3][4], float in2[3][4], float out[3][4]){
 	out[0][0] = in1[0][0] * in2[0][0] + in1[0][1] * in2[1][0] +
@@ -830,9 +820,9 @@ void CMathlib::RGBToHSV(int r, int g, int b, float& h, float& s, float& v) {
 	//H
 	if (range <= 0)
 		h = 0;
-	else if (max == r)
+	else if (max == fr)
 		h = 60 * (fg - fb) / range + (g >= b ? 0 : 360);
-	else if (max == g)
+	else if (max == fg)
 		h = 60 * (fb - fr) / range + 120;
 	else
 		h = 60 * (fr - fg) / range + 240;

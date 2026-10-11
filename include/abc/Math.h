@@ -101,8 +101,10 @@ public:
 	static float VectorNormalize(vec3_t v);
 	static void VectorInverse(vec3_t v);
 	static void VectorScale(const vec3_t in, vec_t scale, vec3_t out);
+	// floor(log2(val)); non-positive input returns 0.
 	static int Q_log2(int val);
 	static void ClearBounds(vec3_t mins, vec3_t maxs);
+	// Any finite normal; zero normal leaves p unchanged. Aliasing is supported.
 	static void ProjectPointOnPlane(vec3_t dst, const vec3_t p, const vec3_t normal);
 	static void PerpendicularVector(vec3_t dst, const vec3_t src);
 	static vec_t Q_rint(vec_t in);
@@ -117,6 +119,7 @@ public:
 
 	static void R_ConcatRotations(float in1[3][3], float in2[3][3], float out[3][3]);
 	static void R_ConcatTransforms(float in1[3][4], float in2[3][4], float out[3][4]);
+	// Affine row-major matrices; angles are pitch/yaw/roll degrees. Writes (0,0,0,1) last row.
 	static void Matrix4x4_CreateFromEntity(float out[4][4], const vec3_t angles, const vec3_t origin, float scale);
 
 	static void FloorDivMod(double numer, double denom, int* quotient, int* rem);
@@ -124,6 +127,8 @@ public:
 	static void RotatePointAroundVector(vec3_t dst, const vec3_t dir, const vec3_t point, float degrees);
 
 	static void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
+	// Legacy compatibility name: currently identical orientation to AngleVectors,
+	// NOT a mathematical transpose. Dormant; do not use as an inverse matrix.
 	static void AngleVectorsTranspose(const vec3_t angles, vec3_t* forward, vec3_t* right, vec3_t* up);
 	static void AngleMatrix(const vec3_t angles, float(*matrix)[4]);
 	static void VectorTransform(const vec3_t in1, float in2[3][4], vec3_t out);
@@ -132,6 +137,7 @@ public:
 
 	static int InvertMatrix(const float* m, float* out);
 
+	// Affine inputs only; output may alias either input.
 	static void Matrix4x4_ConcatTransforms(float out[4][4], float in1[4][4], float in2[4][4]);
 
 	static void VectorRotate(const vec3_t in1, const float in2[3][4], vec3_t out);
@@ -141,6 +147,7 @@ public:
 	static float anglemod(float a);
 
 	static void ConcatTransforms(float in1[3][4], float in2[3][4], float out[3][4]);
+	// RGB channels in [0,255]; HSV hue degrees, saturation/value in [0,1].
 	static void RGBToHSV(int r, int g, int b, float& h, float& s, float& v);
 	static void HSVToRGB(float h, float s, float v, int& r, int& g, int& b);
 };
