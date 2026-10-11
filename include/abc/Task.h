@@ -13,6 +13,9 @@
 #include <functional>
 #include <list>
 #include <thread>
+#include <mutex>
+#include <exception>
+#include <utility>
 
 namespace abc {
 
@@ -34,9 +37,11 @@ public:
 	CTaskItem(std::function<Result()>& futrue) {
 		auto& refB = m_bReady;
 		auto& refV = m_pValue;
+		auto& error = m_pError;
 		m_pThread = std::thread(
-			[&refB, &refV, ft = std::move(futrue)]() mutable {
-				refV = ft();
+			[&refB, &refV, &error, ft = std::move(futrue)]() mutable {
+				try { refV = ft(); }
+					catch (...) { error = std::current_exception(); }
 				refB = true;
 			}
 		);
@@ -65,22 +70,36 @@ public:
 	}
 	//get caller
 	virtual std::function<void()> GetCaller() override {
-		// A task started without ContinueWith (fire-and-forget) yields a
+		if (m_pError) {
+				auto error = m_pError;
+				return [error]() { std::rethrow_exception(error); };
+			}
+			// A task started without ContinueWith (fire-and-forget) yields a
 		// no-op, so CheckAll never std::invoke()s an empty std::function.
 		if (!m_pContinue)
 			return []() {};
 		return std::bind(m_pContinue, m_pValue);
 	}
 private:
-	Result m_pValue;
+	Result m_pValue{};
+	std::exception_ptr m_pError;
 	std::function<void(Result&)> m_pContinue;
 };
 
 class CTaskManager {
 public:
+	// Main-thread only: Add/ContinueWith/Has/CheckAll/Shutdown. Complete the
+	// fluent chain before pumping CheckAll. Worker threads use Post only.
+	// Workers must finish cooperatively before DLL unload: Shutdown joins;
+	// it cannot safely bound arbitrary user work or detach DLL code.
+	~CTaskManager() { Shutdown(); }
+	bool Post(std::function<void()> fn);
+	std::exception_ptr TakeException();
 	//add a new async task
 	template <typename Result, typename F, typename... Args>
 	CTaskItem<Result>* Add(F&& func, Args&&... args) {
+		if (!m_bAccepting)
+			return nullptr;
 		std::function<Result()> a = std::bind(std::forward<F>(func), std::forward<Args>(args)...);
 		CTaskItem<Result>* item = new CTaskItem<Result>(a);
 		m_aryPending.push_back(item);
@@ -92,6 +111,11 @@ public:
 	void CheckAll();
 	void Shutdown();
 private:
+	std::mutex m_Mutex;
+	std::list<std::function<void()>> m_Callbacks;
+	std::atomic_bool m_bAccepting = true;
+	std::exception_ptr m_LastException; // main-thread error channel
+	void Invoke(std::function<void()> fn);
 	std::list<ITaskItem*> m_aryList;
 	std::list<ITaskItem*> m_aryPending;
 };

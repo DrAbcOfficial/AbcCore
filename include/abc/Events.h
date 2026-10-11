@@ -66,7 +66,9 @@ private:
 
 // Run fn on the main thread shortly after this call: it is queued through the
 // task manager, and the host plugin must pump abc::GetTaskManager()->CheckAll()
-// per frame (HUD_Frame) for it to run. Fire-and-forget.
+// per frame (HUD_Frame) for it to run. Thread-safe, fire-and-forget.
+// Shutdown rejects new posts and discards pending callbacks; use manager Post
+// when the caller needs an acceptance result.
 void DispatchToMainThread(std::function<void()> fn);
 
 }

@@ -103,14 +103,7 @@ void CChainedCommand::RunChain() {
 }
 
 void DispatchToMainThread(std::function<void()> fn) {
-	// The task body itself is a no-op on the worker thread; the payload rides
-	// the continuation, which the host plugin runs on the main thread when it
-	// pumps GetTaskManager()->CheckAll() (per frame).
-	GetTaskManager()->Add<int>([]() -> int { return 0; })
-		->ContinueWith([fn](int&) {
-			if (fn)
-				fn();
-		});
+	GetTaskManager()->Post(std::move(fn));
 }
 
 }
