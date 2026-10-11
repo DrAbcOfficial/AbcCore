@@ -22,6 +22,8 @@ namespace abc {
 // for existing files. Return false on any failure; never truncate the target.
 // Relative paths only; call after GameDir is ready.
 // Raw JSON text under "<mod dir>/<relativePath>".
+enum class JsonLoadStatus { Success, Missing, Invalid, IoError };
+JsonLoadStatus ReadJsonFileStatus(const char* relativePath, std::string& jsonOut);
 bool ReadJsonFile(const char* relativePath, std::string& jsonOut);
 bool WriteJsonFile(const char* relativePath, const std::string& json);
 
@@ -30,17 +32,21 @@ bool WriteJsonFile(const char* relativePath, const std::string& json);
 // JsonSave takes a non-const reference because AIGCJson's serializer API
 // (ObjectToJson) is non-const.
 template <typename T>
-bool JsonLoad(T& cfg, const char* relativePath) {
+JsonLoadStatus JsonLoadWithStatus(T& cfg, const char* relativePath) {
 	std::string json;
-	if (!ReadJsonFile(relativePath, json))
-		return false;
-	T candidate = cfg; // Preserve omitted-field defaults and caller state on failure.
+	const auto status = ReadJsonFileStatus(relativePath, json);
+	if (status != JsonLoadStatus::Success) return status;
+	T candidate = cfg;
 	if (!aigc::JsonHelper::JsonToObject(candidate, json)) {
 		ConsoleWarn("Couldn't parse config file %s\n", relativePath);
-		return false;
+		return JsonLoadStatus::Invalid;
 	}
 	cfg = std::move(candidate);
-	return true;
+	return JsonLoadStatus::Success;
+}
+template <typename T>
+bool JsonLoad(T& cfg, const char* relativePath) {
+	return JsonLoadWithStatus(cfg, relativePath) == JsonLoadStatus::Success;
 }
 
 template <typename T>
