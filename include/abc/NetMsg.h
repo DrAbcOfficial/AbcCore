@@ -26,6 +26,7 @@ public:
 	}
 
 	bool ok() const { return !Error; }
+	int remaining() const { return !Error && Pos <= Size ? Size - Pos : 0; }
 
 	int8_t readChar() {
 		if (!canRead(1)) {
