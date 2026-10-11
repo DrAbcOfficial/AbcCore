@@ -19,9 +19,12 @@
 // - A "{...}" run that is not a well-formed placeholder renders verbatim;
 //   an index past the argument count renders verbatim too (the visible
 //   "{2}" is the bug report).
-// - No exceptions, no allocation beyond the result string.
+// - String conversion/output may allocate and throw. No printf interpretation.
+//   This is not RML escaping or console-command argument escaping.
 
 #include <cstddef>
+#include <limits>
+#include <type_traits>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -69,12 +72,17 @@ inline std::string Format(std::string_view fmt, Args&&... args) {
 		size_t j = i + 1;
 		size_t index = 0;
 		bool digits = false;
+		bool overflow = false;
 		while (j < fmt.size() && fmt[j] >= '0' && fmt[j] <= '9') {
-			index = index * 10 + static_cast<size_t>(fmt[j] - '0');
+			const size_t digit = static_cast<size_t>(fmt[j] - '0');
+			if (index > (std::numeric_limits<size_t>::max() - digit) / 10)
+				overflow = true;
+			else if (!overflow)
+				index = index * 10 + digit;
 			digits = true;
 			j++;
 		}
-		if (digits && j < fmt.size() && fmt[j] == '}' && index < kArgCount) {
+		if (digits && !overflow && j < fmt.size() && fmt[j] == '}' && index < kArgCount) {
 			out += values[index];
 			i = j;
 		}

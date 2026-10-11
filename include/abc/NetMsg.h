@@ -21,14 +21,14 @@ class MsgReader {
 public:
 	MsgReader(const void* buffer, int size)
 		: Buffer(static_cast<const uint8_t*>(buffer)), Size(size) {
-		if (!Buffer && Size > 0)
+		if (Size < 0 || (!Buffer && Size > 0))
 			Error = true;
 	}
 
 	bool ok() const { return !Error; }
 
 	int8_t readChar() {
-		if (Pos + 1 > Size) {
+		if (!canRead(1)) {
 			Error = true;
 			return 0;
 		}
@@ -36,7 +36,7 @@ public:
 	}
 
 	uint8_t readByte() {
-		if (Pos + 1 > Size) {
+		if (!canRead(1)) {
 			Error = true;
 			return 0;
 		}
@@ -44,7 +44,7 @@ public:
 	}
 
 	int16_t readShort() {
-		if (Pos + 2 > Size) {
+		if (!canRead(2)) {
 			Error = true;
 			return 0;
 		}
@@ -54,7 +54,7 @@ public:
 	}
 
 	int32_t readLong() {
-		if (Pos + 4 > Size) {
+		if (!canRead(4)) {
 			Error = true;
 			return 0;
 		}
@@ -65,7 +65,7 @@ public:
 	}
 
 	float readFloat() {
-		if (Pos + 4 > Size) {
+		if (!canRead(4)) {
 			Error = true;
 			return 0;
 		}
@@ -82,10 +82,13 @@ public:
 		std::string result;
 		while (Pos < Size) {
 			char c = static_cast<char>(readByte());
+			if (!ok())
+				return result;
 			if (c == '\0')
-				break;
+				return result;
 			result += c;
 		}
+		Error = true; // Every string, including an empty one, needs a NUL.
 		return result;
 	}
 
@@ -97,6 +100,9 @@ public:
 	}
 
 private:
+	bool canRead(int count) const {
+		return !Error && Buffer && Pos <= Size && count <= Size - Pos;
+	}
 	const uint8_t* Buffer = nullptr;
 	int Size = 0;
 	int Pos = 0;
