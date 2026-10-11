@@ -7,10 +7,13 @@
 // compiling it requires the IUtilHTTPClient.h header from the UtilHTTPClient
 // PluginLib (provide ABC_HTTPCLIENT_INCLUDE_DIR), and runtime requires
 // UtilHTTPClient_libcurl.dll to be loaded by the game. No current consumer;
-// kept verbatim (namespace abc, SYS_ERROR -> abc::SysError, cookie jar moved
+// retained with historical adaptations (namespace abc, SYS_ERROR -> abc::SysError, cookie jar moved
 // from vgui::filesystem() to the engine IFileSystem) for future use.
 //
-// Ownership contract (R-16 rework, D-17): the underlying request owns its
+// BLOCKED: the intended ownership below is NOT currently guaranteed (CORE-02):
+// Destroy publishes completion before returning and races frame reclamation.
+// Do not enable until matching dependencies and a safe callback fence are verified.
+// Intended ownership contract (R-16 rework, D-17): the underlying request owns its
 // lifetime (SetAutoDestroyOnFinish) and its Destroy() callback is the item's
 // single deletion authority - it fires on the HTTP THREAD, so:
 //   - never delete a CHttpClientItem outside CHttpClient::CheckAll() (frame

@@ -15,21 +15,22 @@ const char* GameDir() {
 		if (dir && *dir)
 			CachedGameDir = dir;
 		else if (!WarnedNoGameDir) {
-			// Paths will silently degrade to process-CWD-relative until the
-			// engine dir is available; usually means "called too early".
+			// Do not invent a writable CWD-relative root before engine readiness.
 			WarnedNoGameDir = true;
-			ConsoleWarn("GameDir not available yet, paths stay CWD-relative\n");
+			ConsoleWarn("GameDir not available yet, path operations are unavailable\n");
 		}
 	}
 	return CachedGameDir.c_str();
 }
 
 std::string ModPath(const char* relativePath) {
+	if (!relativePath || !*GameDir()) return {};
 	std::filesystem::path p = std::filesystem::path(GameDir()) / std::filesystem::u8path(relativePath);
 	return p.string();
 }
 
 bool EnsureDir(const char* relativeDir) {
+	if (!relativeDir || !*GameDir()) return false;
 	std::error_code ec;
 	std::filesystem::create_directories(std::filesystem::path(GameDir()) / std::filesystem::u8path(relativeDir), ec);
 	if (ec) {
@@ -40,6 +41,7 @@ bool EnsureDir(const char* relativeDir) {
 }
 
 bool EnsureParentDir(const char* relativeFilePath) {
+	if (!relativeFilePath || !*GameDir()) return false;
 	std::filesystem::path p = std::filesystem::path(GameDir()) / std::filesystem::u8path(relativeFilePath);
 	std::filesystem::path parent = p.parent_path();
 	if (parent.empty())

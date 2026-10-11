@@ -18,7 +18,9 @@ namespace abc {
 
 // Engine mod directory (g_pMetaHookAPI->GetGameDirectory), cached.
 const char* GameDir();
-// "<mod dir>/<relativePath>" with native separators.
+// Trusted local paths only (not server/user input): absolute paths/.. are
+// not sandboxed by these general helpers. Config separately restricts paths.
+// "<mod dir>/<relativePath>" with native separators; empty until root ready.
 std::string ModPath(const char* relativePath);
 // Creates "<mod dir>/<relativeDir>" recursively; true when it exists after.
 bool EnsureDir(const char* relativeDir);

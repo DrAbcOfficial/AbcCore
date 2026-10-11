@@ -9,10 +9,6 @@
 
 namespace abc {
 
-xcommand_t Q_HOOK_COMMAND(const char* cmd, xcommand_t func) {
-	return g_pMetaHookAPI->HookCmd(cmd, func);
-}
-
 void ADD_COMMAND(const char* cmd, void (*pfnEngSrc_function)(void)) {
 	gEngfuncs.pfnAddCommand(cmd, pfnEngSrc_function);
 }

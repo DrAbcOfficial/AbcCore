@@ -13,6 +13,8 @@ namespace abc {
 
 namespace {
 	CChainedCommand* s_Slots[CChainedCommand::kMaxInstances] = {};
+	bool s_Used[CChainedCommand::kMaxInstances] = {};
+	xcommand_t s_Predecessors[CChainedCommand::kMaxInstances] = {};
 }
 
 // Captureless lambdas decay to xcommand_t; one distinct entry point per slot
@@ -55,7 +57,8 @@ static const xcommand_t kThunks[CChainedCommand::kMaxInstances] = {
 CChainedCommand::CChainedCommand(const char* cmdName) {
 	_snprintf_s(m_szName, sizeof(m_szName), _TRUNCATE, "%s", cmdName);
 	for (size_t i = 0; i < kMaxInstances; i++) {
-		if (!s_Slots[i]) {
+		if (!s_Used[i]) {
+			s_Used[i] = true;
 			m_iSlot = (int)i;
 			s_Slots[i] = this;
 			break;
@@ -66,6 +69,7 @@ CChainedCommand::CChainedCommand(const char* cmdName) {
 	// chained through.
 	if (m_iSlot >= 0) {
 		m_pfnOriginal = g_pMetaHookAPI->HookCmd(m_szName, kThunks[m_iSlot]);
+		s_Predecessors[m_iSlot] = m_pfnOriginal;
 	} else {
 		ConsoleWarn("CChainedCommand: slot table full (%zu), \"%s\" left unhooked\n",
 			kMaxInstances, m_szName);
@@ -73,10 +77,16 @@ CChainedCommand::CChainedCommand(const char* cmdName) {
 }
 
 CChainedCommand::~CChainedCommand() {
-	if (m_iSlot >= 0)
-		s_Slots[m_iSlot] = nullptr;
-	// No HookCmd uninstall exists in the MetaHook API; a destroyed command's
-	// thunk finds an empty slot and returns without chaining.
+	if (m_iSlot < 0) return;
+	// Engine-thread only. Restore only if still the top hook; never clobber
+	// another plugin installed later. Retire the slot permanently because
+	// another owner may retain our thunk as its predecessor.
+	if (g_pMetaHookAPI && g_pMetaHookAPI->FindCmd) {
+		auto* command = g_pMetaHookAPI->FindCmd(m_szName);
+		if (command && command->function == kThunks[m_iSlot])
+			g_pMetaHookAPI->HookCmd(m_szName, m_pfnOriginal);
+	}
+	s_Slots[m_iSlot] = nullptr;
 }
 
 void CChainedCommand::DispatchSlot(size_t slot) {
@@ -84,13 +94,8 @@ void CChainedCommand::DispatchSlot(size_t slot) {
 		s_Slots[slot]->RunChain();
 		return;
 	}
-	// A thunk whose command object was destroyed lands here (MetaHook has no
-	// HookCmd uninstall). Warn once: a dead binding must not vanish silently.
-	static bool WarnedDeadThunk = false;
-	if (!WarnedDeadThunk) {
-		WarnedDeadThunk = true;
-		ConsoleWarn("CChainedCommand: command fired on a freed slot, binding dropped\n");
-	}
+	if (slot < kMaxInstances && s_Predecessors[slot])
+		s_Predecessors[slot]();
 }
 
 void CChainedCommand::RunChain() {
