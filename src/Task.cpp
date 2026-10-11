@@ -72,7 +72,9 @@ void CTaskManager::CheckAll(){
 			// is self-contained; pull it out before deleting the item (the
 			// destructor joins the worker thread) and invoke after, keeping
 			// the continuation free of any state owned by the item.
-			auto caller = std::move(item->GetCaller());
+			std::function<void()> caller;
+			try { caller = item->GetCaller(); }
+			catch (...) { if (!m_LastException) m_LastException = std::current_exception(); }
 			delete item;
 			iter = m_aryList.erase(iter);
 			Invoke(std::move(caller));
