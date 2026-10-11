@@ -75,7 +75,7 @@ inline std::string Format(std::string_view fmt, Args&&... args) {
 		bool overflow = false;
 		while (j < fmt.size() && fmt[j] >= '0' && fmt[j] <= '9') {
 			const size_t digit = static_cast<size_t>(fmt[j] - '0');
-			if (index > (std::numeric_limits<size_t>::max() - digit) / 10)
+			if (index > ((std::numeric_limits<size_t>::max)() - digit) / 10)
 				overflow = true;
 			else if (!overflow)
 				index = index * 10 + digit;
