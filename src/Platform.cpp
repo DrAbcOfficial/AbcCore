@@ -72,12 +72,14 @@ HICON Win32GetFileIconByExtension(const std::string& extension) {
 			path = iconPath.substr(0, pos);
 			index = static_cast<int>(std::strtol(iconPath.c_str() + pos + 1, nullptr, 10));
 		}
+		if (path.size() >= 2 && path.front() == '"' && path.back() == '"') path = path.substr(1, path.size()-2);
 		char expandedPath[MAX_PATH];
-		ExpandEnvironmentStringsA(path.c_str(), expandedPath, MAX_PATH);
+		const DWORD expanded = ExpandEnvironmentStringsA(path.c_str(), expandedPath, MAX_PATH);
+		if (!expanded || expanded > MAX_PATH) return NULL;
 		wchar_t widePath[MAX_PATH];
-		MultiByteToWideChar(CP_ACP, 0, expandedPath, -1, widePath, MAX_PATH);
-		HICON smallIcon;
-		ExtractIconExW(widePath, index, NULL, &smallIcon, 1);
+		if (!MultiByteToWideChar(CP_ACP, 0, expandedPath, -1, widePath, MAX_PATH)) return NULL;
+		HICON smallIcon = NULL;
+		if (ExtractIconExW(widePath, index, NULL, &smallIcon, 1) != 1) return NULL;
 		return smallIcon;
 	}
 	return NULL;
@@ -85,8 +87,9 @@ HICON Win32GetFileIconByExtension(const std::string& extension) {
 BITMAP Win32GetBitmapInfo(HICON hIcon) {
 	BITMAP bmp = {};
 	ICONINFO iconInfo = {};
-	GetIconInfo(hIcon, &iconInfo);
-	GetObject(iconInfo.hbmColor, sizeof(BITMAP), &bmp);
+	if (!GetIconInfo(hIcon, &iconInfo)) return bmp;
+	GetObject(iconInfo.hbmColor ? iconInfo.hbmColor : iconInfo.hbmMask, sizeof(BITMAP), &bmp);
+	if (!iconInfo.hbmColor) bmp.bmHeight /= 2;
 	if (iconInfo.hbmColor)
 		DeleteObject(iconInfo.hbmColor);
 	if (iconInfo.hbmMask)
@@ -94,35 +97,35 @@ BITMAP Win32GetBitmapInfo(HICON hIcon) {
 	return bmp;
 }
 std::vector<unsigned char> Win32ConvertHICONToRGBA(HICON hIcon, size_t& ww, size_t& hh) {
+	ww = hh = 0;
 	BITMAP bmp = Win32GetBitmapInfo(hIcon);
-	int width = bmp.bmWidth;
-	int height = bmp.bmHeight;
-	ww = width;
-	hh = height;
-	HDC hdc = CreateCompatibleDC(NULL);
-	BITMAPINFO bmi;
-	ZeroMemory(&bmi, sizeof(BITMAPINFO));
+	const int width = bmp.bmWidth, height = bmp.bmHeight;
+	if (width <= 0 || height <= 0 || width > 4096 || height > 4096) return {};
+	// Allocate before acquiring handles so bad_alloc cannot leak GDI resources.
+	std::vector<unsigned char> rgba(static_cast<size_t>(width) * height * 4);
+	HDC dc = CreateCompatibleDC(NULL);
+	if (!dc) return {};
+	BITMAPINFO bmi{};
 	bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	bmi.bmiHeader.biWidth = width;
 	bmi.bmiHeader.biHeight = -height;
 	bmi.bmiHeader.biPlanes = 1;
 	bmi.bmiHeader.biBitCount = 32;
-	bmi.bmiHeader.biCompression = BI_RGB;
 	unsigned char* bits = nullptr;
-	HBITMAP hBmp = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, (void**)&bits, NULL, 0);
-	SelectObject(hdc, hBmp);
-	DrawIconEx(hdc, 0, 0, hIcon, width, height, 0, NULL, DI_NORMAL);
-	std::vector<unsigned char> rgba;
-	if (bits) {
-		for (int i = 0; i < width * height * 4; i += 4) {
-			rgba.push_back(bits[i + 2]);
-			rgba.push_back(bits[i + 1]);
-			rgba.push_back(bits[i]);
-			rgba.push_back(bits[i + 3]);
-		}
+	HBITMAP bitmap = CreateDIBSection(dc, &bmi, DIB_RGB_COLORS, (void**)&bits, NULL, 0);
+	if (!bitmap || !bits) { if (bitmap) DeleteObject(bitmap); DeleteDC(dc); return {}; }
+	HGDIOBJ previous = SelectObject(dc, bitmap);
+	if (!previous || previous == HGDI_ERROR) { DeleteObject(bitmap); DeleteDC(dc); return {}; }
+	std::memset(bits, 0, rgba.size());
+	const bool ok = DrawIconEx(dc, 0, 0, hIcon, width, height, 0, NULL, DI_NORMAL) != FALSE;
+	if (ok) for (size_t i = 0; i < rgba.size(); i += 4) {
+		rgba[i] = bits[i+2]; rgba[i+1] = bits[i+1]; rgba[i+2] = bits[i]; rgba[i+3] = bits[i+3];
 	}
-	DeleteObject(hBmp);
-	DeleteDC(hdc);
+	SelectObject(dc, previous); // Never delete an object while selected in a DC.
+	DeleteObject(bitmap);
+	DeleteDC(dc);
+	if (!ok) return {};
+	ww = width; hh = height;
 	return rgba;
 }
 void Sys_GetRegKeyValueUnderRoot(HKEY rootKey, const char* pszSubKey, const char* pszElement, char* pszReturnString, int nReturnLength, const char* pszDefaultValue){

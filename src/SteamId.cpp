@@ -6,6 +6,9 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <charconv>
+#include <string_view>
+#include <limits>
 
 // Valve parse code uses the tier0-style `uint` typedef.
 using uint = unsigned int;
@@ -14,8 +17,44 @@ using uint = unsigned int;
 
 namespace abc {
 
+bool TryParseSteamID(const char* text, CSteamID& out) {
+	if (!text || !*text) return false;
+	std::string_view input(text);
+	auto number = [](std::string_view part, uint64& value) {
+		if (part.empty()) return false;
+		auto result = std::from_chars(part.data(), part.data()+part.size(), value);
+		return result.ec == std::errc{} && result.ptr == part.data()+part.size();
+	};
+	uint64 universe = 1, account = 0, parity = 0;
+	CSteamID candidate;
+	if (input.starts_with("STEAM_")) {
+		input.remove_prefix(6);
+		auto first = input.find(':'), last = input.rfind(':');
+		if (first == input.npos || first == last || !number(input.substr(0,first),universe)
+			|| !number(input.substr(first+1,last-first-1),parity) || parity > 1
+			|| !number(input.substr(last+1),account) || account > (UINT32_MAX-parity)/2) return false;
+		account = account*2+parity;
+		if (universe == 0) universe = 1;
+	} else if (input.starts_with("[U:") && input.ends_with("]")) {
+		input.remove_prefix(3); input.remove_suffix(1); auto colon = input.find(':');
+		if (colon == input.npos || !number(input.substr(0,colon),universe) || !number(input.substr(colon+1),account)) return false;
+	} else {
+		if (!number(input,account)) return false;
+		if (account > UINT32_MAX) {
+			candidate.SetFromUint64(account);
+			if (!candidate.IsValid()) return false;
+			out = candidate; return true;
+		}
+	}
+	if (!universe || universe >= k_EUniverseMax || account > UINT32_MAX) return false;
+	candidate.InstancedSet(static_cast<uint32>(account), 1, static_cast<EUniverse>(universe), k_EAccountTypeIndividual);
+	if (!candidate.IsValid()) return false;
+	out = candidate; return true;
+}
 CSteamID ParseSteamID(const char* text) {
-	return CSteamID(text);
+	CSteamID id;
+	TryParseSteamID(text, id);
+	return id;
 }
 
 const char* RenderSteamID(const CSteamID& id) {
@@ -40,6 +79,8 @@ CSteamID::CSteamID(const char* pchSteamID, EUniverse eDefaultUniverse /* = k_EUn
 //-----------------------------------------------------------------------------
 void CSteamID::SetFromString(const char* pchSteamID, EUniverse eDefaultUniverse)
 {
+	if (!pchSteamID) { Clear(); return; }
+	if (strncmp(pchSteamID, "STEAM_", 6) == 0) { *this = abc::ParseSteamID(pchSteamID); return; }
 	uint nAccountID = 0;
 	uint nInstance = 1;
 	EUniverse eUniverse = eDefaultUniverse;
@@ -175,7 +216,7 @@ void CSteamID::SetFromString(const char* pchSteamID, EUniverse eDefaultUniverse)
 
 //-----------------------------------------------------------------------------
 // Purpose: Renders the steam ID to a buffer.  NOTE: for convenience of calling
-//			code, this code returns a pointer to a static buffer and is NOT thread-safe.
+//			code, this code returns a pointer to a thread-local ring buffer (valid until four more renders on this thread).
 // Output:  buffer with rendered Steam ID
 //-----------------------------------------------------------------------------
 const char* CSteamID::Render() const
@@ -186,8 +227,8 @@ const char* CSteamID::Render() const
 	const int k_cBufLen = 37;
 
 	const int k_cBufs = 4;	// # of static bufs to use (so people can compose output with multiple calls to Render() )
-	static char rgchBuf[k_cBufs][k_cBufLen];
-	static int nBuf = 0;
+	static thread_local char rgchBuf[k_cBufs][k_cBufLen];
+	static thread_local int nBuf = 0;
 	char* pchBuf = rgchBuf[nBuf];	// get pointer to current static buf
 	nBuf++;	// use next buffer for next call to this method
 	nBuf %= k_cBufs;
@@ -255,7 +296,7 @@ const char* CSteamID::Render() const
 
 //-----------------------------------------------------------------------------
 // Purpose: Renders the passed-in steam ID to a buffer.  NOTE: for convenience of calling
-//			code, this code returns a pointer to a static buffer and is NOT thread-safe.
+//			code, this code returns a pointer to a thread-local ring buffer (valid until four more renders on this thread).
 // Input:	64-bit representation of Steam ID to render
 // Output:  buffer with rendered Steam ID
 //-----------------------------------------------------------------------------
