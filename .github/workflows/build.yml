@@ -52,12 +52,32 @@ jobs:
           "$env:RUNNER_TEMP\cmake\cmake-$version-windows-x86_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
       - name: Configure
-        # The CMake presets pin the Visual Studio 18 2026 generator, which the
-        # runner image does not carry yet; configure the same Win32/x86 target
-        # with the bundled Visual Studio 2022 generator instead.
+        # The CMake presets pin one Visual Studio generation; pick the
+        # generator matching the instance actually installed on the runner
+        # and point CMake at it explicitly.
         run: |
           cmake --version
-          cmake -S . -B build/ci -G "Visual Studio 17 2022" -A Win32
+          $generator = $null
+          $instance = $null
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          Write-Host "vswhere present: $(Test-Path $vswhere)"
+          if (Test-Path $vswhere) {
+            $instances = & $vswhere -all -prerelease -products * -format json | ConvertFrom-Json
+            $instances | ForEach-Object { Write-Host "VS $($_.installationVersion) at $($_.installationPath)" }
+            $latest = $instances | Sort-Object { [int]($_.installationVersion.Split('.')[0]) } -Descending | Select-Object -First 1
+            if ($latest) {
+              $instance = $latest.installationPath
+              $major = [int]$latest.installationVersion.Split('.')[0]
+              if ($major -ge 18) { $generator = 'Visual Studio 18 2026' } else { $generator = 'Visual Studio 17 2022' }
+            }
+          }
+          if (-not $generator) { $generator = 'Visual Studio 17 2022' }
+          Write-Host "Generating with '$generator' (instance: '$instance')"
+          if ($instance) {
+            cmake -S . -B build/ci -G $generator -A Win32 -DCMAKE_GENERATOR_INSTANCE="$instance"
+          } else {
+            cmake -S . -B build/ci -G $generator -A Win32
+          }
 
       - name: Build (${{ matrix.config }})
         run: cmake --build build/ci --config ${{ matrix.config }} --parallel
