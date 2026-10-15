@@ -1,26 +1,26 @@
 # AGENTS.md
 
-面向在本仓库中工作的 AI/自动化协作者。开始前先读 `README.md`（本仓库唯一随发布分发的说明文档）。
+Guidance for AI/automation collaborators working in this repository. Read `README.md` first - it is the only document distributed with the release.
 
-## 硬性约束
+## Hard rules
 
-- 提交内容（代码、注释、文档、提交信息、标签）不得出现本机路径、个人目录、会话记录或任何凭证；游戏目录一律通过 `ABC_GAME_DIR` 环境变量提供。
-- 不提交测试脚手架、验收脚本、证据截图、计划与进度记录等会话产物。
-- README 是唯一对外文档；接口或行为变化必须同步更新 README。
-- 子模块 pin 只指向对应上游已公开的提交；升级 pin 前先确认该提交已推送。
+- Nothing committed (code, comments, docs, commit messages, tags) may contain local machine paths, personal directories, session logs or any credentials; the game directory is always provided through the `ABC_GAME_DIR` environment variable.
+- Do not commit test scaffolding, acceptance scripts, evidence screenshots, plans or progress logs; those are session artifacts that do not belong in the release.
+- The README is the single public document; interface or behaviour changes must update it in the same commit.
+- Submodule pins may only point at commits that are already public upstream; confirm the commit is pushed before bumping a pin.
 
-## 构建
+## Build
 
-仅 Win32 x86 / C++20 / 静态 CRT：
+Win32 x86 only / C++20 / static CRT:
 
 ```bash
 cmake --preset win32-debug
-cmake --build --preset win32-debug    # Release：win32-release
+cmake --build --preset win32-debug    # Release: win32-release
 ```
 
-## 约定
+## Conventions
 
-- 命名遵循 LLVM 风格；公共 API 放 `include/abc/`，实现放 `src/`，公共头文件必须可单独包含。
-- `RenderCommon.h` 常量与 `thirdparty/Renderer` 逐字同步，由 `check-rendercommon-sync` 构建目标把关。
-- 提交信息使用 `type(scope): 摘要`（feat / fix / refactor / docs / build / chore），正文说明动机与验证方式。
-- 交付前自查：无本机路径与凭证；README 与实际行为一致；Debug 与 Release 均可构建。
+- Naming follows the LLVM style; public APIs live in `include/abc/`, implementations in `src/`, and public headers must be self-contained.
+- `RenderCommon.h` constants are kept character-for-character in sync with `thirdparty/Renderer`; the `check-rendercommon-sync` build target enforces this.
+- Commit messages use `type(scope): summary` (feat / fix / refactor / docs / build / chore) with motivation and verification in the body.
+- Before handing off: no local paths or credentials; README matches actual behaviour; Debug and Release both build.
