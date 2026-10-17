@@ -41,7 +41,7 @@ add_subdirectory(thirdparty/AbcCore)
 target_link_libraries(MyPlugin PRIVATE Abc::Core)
 ```
 
-`abc_core` propagates the MetaHook / eventpp / AIGCJson / SteamSDK include paths as PUBLIC. Deploy `AbcCore.dll` to `<game>/svencoop/metahook/dlls/AbcCore/`; MetaHook adds every `metahook/dlls/*` subdirectory to `PATH`, so the plugin import tables resolve it at load time.
+`abc_core` propagates the MetaHook / eventpp / AIGCJson / SteamSDK include paths as PUBLIC. Deploy `AbcCore.dll` to `<game>/svencoop/metahook/dlls/AbcCore/`; MetaHook adds every `metahook/dlls/*` subdirectory to `PATH`, so the plugin import tables resolve it at load time. The aggregate release packages the single shared gamedata catalog at `svencoop/metahook/gamedata/abc/` together with `AbcCore.dll`.
 
 Each plugin defines its own MetaHook globals in `src/CoreGlobals.cpp`. The inline `CAbcPluginBase` copies the host pointers into AbcCore.dll through the exported context setters, so both plugin code and the shared core see the same engine state. See `include/abc/Plugin.h` for the entry-point pattern.
 
