@@ -51,3 +51,7 @@ target_link_libraries(MyPlugin PRIVATE Abc::Core)
 | `thirdparty/eventpp` | https://github.com/wqking/eventpp | `v0.1.3` (`d2db8af2a46c79f8dc75759019fba487948e9442`) |
 | `thirdparty/AIGCJson` | https://github.com/AIGMix/AIGCJson | `d67ea37e54c47e6b0f65a4d97b564c1b4fd8146c` |
 | `thirdparty/SteamSDK` | https://github.com/MetaHookSv/SteamSDK | `3c1abaf6277f9f99fd16ef40557d6852820b848f` |
+
+## License
+
+Licensed under the [BSD 3-Clause License](LICENSE); each dependency keeps its own license.
