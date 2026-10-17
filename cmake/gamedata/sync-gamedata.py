@@ -1090,16 +1090,18 @@ def download_snapshot(
 
 def validate_target_path(target_dir: Path) -> Path:
     absolute_target = Path(os.path.abspath(str(target_dir)))
-    # Accept the launcher's own catalog (<...>/metahook/gamedata) and a plugin
-    # catalog nested under it (<...>/metahook/gamedata/<plugin>). Any other
-    # location is refused so the synchronizer cannot publish somewhere unexpected.
+    # Accept the launcher's own catalog (<...>/metahook/gamedata) and any plugin
+    # catalog nested under it, including grouped catalogs such as
+    # <...>/metahook/gamedata/abc/<plugin>. Any other location is refused so
+    # the synchronizer cannot publish somewhere unexpected.
     is_launcher_catalog = (
         absolute_target.name.lower() == "gamedata"
         and absolute_target.parent.name.lower() == "metahook"
     )
-    is_nested_plugin_catalog = (
-        absolute_target.parent.name.lower() == "gamedata"
-        and absolute_target.parent.parent.name.lower() == "metahook"
+    is_nested_plugin_catalog = any(
+        parent.name.lower() == "gamedata"
+        and parent.parent.name.lower() == "metahook"
+        for parent in absolute_target.parents
     )
     if not (is_launcher_catalog or is_nested_plugin_catalog):
         raise UpdateError(
