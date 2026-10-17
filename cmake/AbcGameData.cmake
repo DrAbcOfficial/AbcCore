@@ -1,7 +1,7 @@
-# Reuse the pinned Renderer consumer's catalog tooling and contract.
+# Bundled catalog tooling and contract, independent of the Renderer checkout.
 function(abc_add_gamedata target manifest)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
-    set(tools "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../thirdparty/Renderer/scripts")
+    set(tools "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/gamedata")
     string(TOLOWER "${target}" catalog)
     set(output "${PROJECT_BINARY_DIR}/assets/svencoop/metahook/gamedata/${catalog}")
     add_custom_target(${target}GameData

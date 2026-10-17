@@ -21,6 +21,7 @@ cmake --build --preset win32-debug    # Release: win32-release
 ## Conventions
 
 - Naming follows the LLVM style; public APIs live in `include/abc/`, implementations in `src/`, and public headers must be self-contained.
-- `RenderCommon.h` constants are kept character-for-character in sync with `thirdparty/Renderer`; the `check-rendercommon-sync` build target enforces this.
+- AbcCore stays renderer-free: do not add Renderer headers, submodules, include paths or build checks here. `IMetaRenderer` glue belongs to AbcUi under `src/render/`.
+- `cmake/gamedata/` is the self-contained gamedata tooling used by `abc_add_gamedata`; keep it independent of plugin checkouts.
 - Commit messages use `type(scope): summary` (feat / fix / refactor / docs / build / chore) with motivation and verification in the body.
 - Before handing off: no local paths or credentials; README matches actual behaviour; Debug and Release both build.

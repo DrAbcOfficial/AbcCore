@@ -1,9 +1,6 @@
 [submodule "thirdparty/MetaHook"]
 	path = thirdparty/MetaHook
 	url = https://github.com/MetaHookSv/MetaHook
-[submodule "thirdparty/Renderer"]
-	path = thirdparty/Renderer
-	url = https://github.com/MetaHookSv/Renderer
 [submodule "thirdparty/eventpp"]
 	path = thirdparty/eventpp
 	url = https://github.com/wqking/eventpp

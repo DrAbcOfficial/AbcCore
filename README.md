@@ -28,10 +28,11 @@ cmake --build --preset win32-debug   # Release: win32-release
 | `Task.h` | Background worker tasks + main-thread continuations (the host calls `abc::GetTaskManager().CheckAll()` every frame) |
 | `Paths.h` | `GameDir` / `ModPath` / `EnsureDir` / `EnsureParentDir` / `CheckAsset` |
 | `Platform.h` | Win32 odds and ends (registry, icon extraction) |
-| `Render.h` / `RenderCommon.h` | `IMetaRenderer` bridge (Bind / DrawTexturePos / CompileShaderFile) and the render constant tables; zero VGUI2/OpenGL dependencies; the `check-rendercommon-sync` target verifies the constants stay in sync with `thirdparty/Renderer` |
 | `SteamId.h` | SteamID parsing/rendering (header-only, no steam_api dependency) |
 
-`cmake/AbcCommon.cmake` is shared with the plugin repositories through `add_subdirectory`; `cmake/AbcGameData.cmake` provides the gamedata manifest sync/validation helpers.
+`cmake/AbcCommon.cmake` is shared with the plugin repositories through `add_subdirectory`; `cmake/AbcGameData.cmake` provides the gamedata manifest sync/validation helpers using the bundled Python tooling in `cmake/gamedata/`.
+
+AbcCore is renderer-free. The `IMetaRenderer` bridge and the renderer constant tables live in AbcUi, which owns the direct Renderer dependency.
 
 ## Using AbcCore downstream
 
@@ -40,14 +41,13 @@ add_subdirectory(thirdparty/AbcCore)
 target_link_libraries(MyPlugin PRIVATE Abc::Core)
 ```
 
-`abc_core` propagates the MetaHook / Renderer / eventpp / AIGCJson / SteamSDK include paths as PUBLIC; plugin DLLs must not define `g_pInterface`, `gEngfuncs`, `g_pMetaHookAPI`, `g_pMetaSave` or `gExportfuncs` again (`Plugin.cpp` already provides one copy of each). See `include/abc/Plugin.h` for the entry-point pattern and the export macro.
+`abc_core` propagates the MetaHook / eventpp / AIGCJson / SteamSDK include paths as PUBLIC; plugin DLLs must not define `g_pInterface`, `gEngfuncs`, `g_pMetaHookAPI`, `g_pMetaSave` or `gExportfuncs` again (`Plugin.cpp` already provides one copy of each). See `include/abc/Plugin.h` for the entry-point pattern and the export macro.
 
 ## Submodules
 
 | Path | Upstream | Pin |
 |---|---|---|
 | `thirdparty/MetaHook` | https://github.com/MetaHookSv/MetaHook | `dbefbebe3124c1840cffd9a096ae06689c8e2380` |
-| `thirdparty/Renderer` | https://github.com/MetaHookSv/Renderer | `e2c3c45e20f320abc0e2c392fef4a175a93aa2ab` |
 | `thirdparty/eventpp` | https://github.com/wqking/eventpp | `v0.1.3` (`d2db8af2a46c79f8dc75759019fba487948e9442`) |
 | `thirdparty/AIGCJson` | https://github.com/AIGMix/AIGCJson | `d67ea37e54c47e6b0f65a4d97b564c1b4fd8146c` |
 | `thirdparty/SteamSDK` | https://github.com/MetaHookSv/SteamSDK | `3c1abaf6277f9f99fd16ef40557d6852820b848f` |

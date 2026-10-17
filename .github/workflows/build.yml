@@ -22,14 +22,6 @@ jobs:
       matrix:
         config: [Debug, Release]
     steps:
-      # The pinned Renderer commit currently only exists in the DrAbcOfficial
-      # fork (upstream PR open); keep recursive submodule fetches working until
-      # the commit lands in MetaHookSv/Renderer.
-      - name: Route the Renderer submodule through the fork
-        shell: pwsh
-        run: |
-          git config --global url."https://github.com/DrAbcOfficial/Renderer".insteadOf "https://github.com/MetaHookSv/Renderer"
-
       - name: Checkout
         uses: actions/checkout@v7.0.1
         with:

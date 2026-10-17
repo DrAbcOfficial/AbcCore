@@ -20,7 +20,6 @@ set(ABC_CORE_SOURCES
     src/Config.cpp
     src/Paths.cpp
     src/Platform.cpp
-    src/Render.cpp
     src/SteamId.cpp
 )
 if(ABC_WITH_HTTP)
@@ -30,16 +29,6 @@ endif()
 
 add_library(abc_core STATIC ${ABC_CORE_SOURCES})
 add_library(Abc::Core ALIAS abc_core)
-
-# RenderCommon.h must stay byte-identical to the pinned Renderer header body;
-# this target fails the build when the constant tables drift apart.
-add_custom_target(check-rendercommon-sync
-    COMMAND "${CMAKE_COMMAND}"
-        "-DABC_ABCCORE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
-        -P "${CMAKE_CURRENT_LIST_DIR}/cmake/CheckRenderCommonSync.cmake"
-    COMMENT "Checking abc/RenderCommon.h sync against thirdparty/Renderer"
-    VERBATIM)
-add_dependencies(abc_core check-rendercommon-sync)
 
 target_include_directories(abc_core
     PUBLIC
@@ -51,8 +40,6 @@ target_include_directories(abc_core
         "${ABC_METAHOOK_INCLUDE_DIR}/HLSDK/engine"
         "${ABC_METAHOOK_INCLUDE_DIR}/HLSDK/pm_shared"
         "${ABC_METAHOOK_INCLUDE_DIR}/HLSDK/public"
-        "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Renderer/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Renderer/include/Interface"
         # Public abc headers pull these in (Events.h -> eventpp, Config.h ->
         # AIGCJson, SteamId.h -> SteamSDK).
         "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/eventpp/include"

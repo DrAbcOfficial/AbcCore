@@ -6,7 +6,7 @@ namespace abc {
 
 static_assert(METAHOOK_API_VERSION >= 115, "ABC gamedata requires MetaHook API 115");
 
-// Match Renderer's required-symbol policy: never fall back to a byte scan.
+// Match the host gamedata required-symbol policy: never fall back to a byte scan.
 inline void* ResolveGameSymbol(void* module, const char* moduleName,
 	const char* name, mh_gamesymbol_kind_t kind) {
 	void* address = nullptr;

@@ -3,3 +3,5 @@ out/
 .vs/
 *.user
 *.aps
+__pycache__/
+*.pyc
