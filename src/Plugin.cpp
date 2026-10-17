@@ -7,8 +7,8 @@
 #include <cstring>
 #include <cstdarg>
 
-// per-DLL instance (static lib): the globals metahook.h declares extern.
-// Defined here so exactly one copy exists per plugin DLL.
+// AbcCore.dll's own copy of the metahook globals. Plugins define their own
+// copies and copy the host pointers here through SetCoreContext.
 mh_interface_t* g_pInterface = nullptr;
 cl_enginefunc_t gEngfuncs = {};
 metahook_api_t* g_pMetaHookAPI = nullptr;
@@ -52,29 +52,13 @@ const char* PluginName() {
 	return s_szPluginName;
 }
 
-void SysError(const char* fmt, ...) {
-	char buf[1024];
-	va_list args;
-	va_start(args, fmt);
-	_vsnprintf_s(buf, sizeof(buf), _TRUNCATE, fmt, args);
-	va_end(args);
-	g_pMetaHookAPI->SysError("[%s]: %s", s_szPluginName, buf);
-}
-
-CAbcPluginBase::CAbcPluginBase(const char* pluginName, const char* version) {
-	_snprintf_s(m_szName, sizeof(m_szName), _TRUNCATE, "%s", pluginName);
-	_snprintf_s(m_szVersion, sizeof(m_szVersion), _TRUNCATE, "%s|Version:%s", pluginName, version);
-	SetPluginName(pluginName);
-}
-
-void CAbcPluginBase::Init(metahook_api_t* pAPI, mh_interface_t* pInterface, mh_enginesave_t* pSave) {
+void SetCoreContext(metahook_api_t* pAPI, mh_interface_t* pInterface, mh_enginesave_t* pSave) {
 	g_pInterface = pInterface;
 	g_pMetaHookAPI = pAPI;
 	g_pMetaSave = pSave;
-	OnInit();
 }
 
-void CAbcPluginBase::LoadEngine(cl_enginefunc_t* pEngineFuncs) {
+void SetEngineFuncs(cl_enginefunc_t* pEngineFuncs) {
 	g_pFileSystem = g_pInterface->FileSystem;
 	g_iEngineType = g_pMetaHookAPI->GetEngineType();
 	g_dwEngineBuildnum = g_pMetaHookAPI->GetEngineBuildnum();
@@ -85,39 +69,22 @@ void CAbcPluginBase::LoadEngine(cl_enginefunc_t* pEngineFuncs) {
 	g_dwEngineRdataBase = (PVOID)g_pMetaHookAPI->GetSectionByName(g_dwEngineBase, ".rdata\x0\x0", &g_dwEngineRdataSize);
 
 	memcpy(&gEngfuncs, pEngineFuncs, sizeof(gEngfuncs));
-
-	if (g_iEngineType != ENGINE_SVENGINE) {
-		SysError("%s can only run in SvEngine!\nEngine type: %d\nEngine buildnum: %d",
-			m_szName, g_iEngineType, g_dwEngineBuildnum);
-		return;
-	}
-
-	OnLoadEngine();
 }
 
-void CAbcPluginBase::LoadClient(cl_exportfuncs_t* pExportFuncs) {
+void SetClientExportFuncs(cl_exportfuncs_t* pExportFuncs) {
 	memcpy(&gExportfuncs, pExportFuncs, sizeof(gExportfuncs));
 
 	g_dwClientBase = g_pMetaHookAPI->GetClientBase();
 	g_dwClientSize = g_pMetaHookAPI->GetClientSize();
-
-	OnLoadClient(pExportFuncs);
 }
 
-void CAbcPluginBase::ExitGame(int iResult) {
-	OnExitGame(iResult);
-}
-
-void CAbcPluginBase::Shutdown() {
-	OnShutdown();
-}
-
-const char* CAbcPluginBase::GetVersion() {
-	return m_szVersion;
-}
-
-const char* CAbcPluginBase::Version() const {
-	return m_szVersion;
+void SysError(const char* fmt, ...) {
+	char buf[1024];
+	va_list args;
+	va_start(args, fmt);
+	_vsnprintf_s(buf, sizeof(buf), _TRUNCATE, fmt, args);
+	va_end(args);
+	g_pMetaHookAPI->SysError("[%s]: %s", s_szPluginName, buf);
 }
 
 }

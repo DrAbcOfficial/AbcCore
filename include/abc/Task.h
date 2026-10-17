@@ -2,8 +2,8 @@
 
 // abc::Task - background thread tasks with main-thread continuations.
 // Ported from ABCEnchance src/core/library/Task.h/.cpp.
-// per-DLL instance (static lib): abc::GetTaskManager() returns one manager per
-// plugin DLL. The host plugin must pump CheckAll() from a per-frame hook
+// process-wide instance in AbcCore.dll: abc::GetTaskManager() returns one
+// manager for the whole process. The host plugin must pump CheckAll() from a per-frame hook
 // (HUD_Frame or equivalent) for continuations to run on the main thread.
 
 #ifndef ABC_TASK_H
@@ -120,7 +120,7 @@ private:
 	std::list<ITaskItem*> m_aryPending;
 };
 
-// per-DLL instance (static lib)
+// process-wide instance in AbcCore.dll
 CTaskManager* GetTaskManager();
 
 }

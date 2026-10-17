@@ -56,7 +56,7 @@ void* SigScanReverse(void* startSearch, unsigned long searchLen, const char* pat
 }
 
 CCvarRegistrar* CCvarRegistrar::Get() {
-	// per-DLL instance (static lib)
+	// process-wide instance in AbcCore.dll
 	static CCvarRegistrar s_Registrar;
 	return &s_Registrar;
 }

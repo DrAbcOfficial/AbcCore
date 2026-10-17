@@ -18,6 +18,9 @@ cmake --preset win32-debug
 cmake --build --preset win32-debug    # Release: win32-release
 ```
 
+AbcCore is a shared DLL (`AbcCore.dll`); consumers link `Abc::Core` and deploy
+the DLL under `svencoop/metahook/dlls/AbcCore/`.
+
 ## Conventions
 
 - Naming follows the LLVM style; public APIs live in `include/abc/`, implementations in `src/`, and public headers must be self-contained.

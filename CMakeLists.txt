@@ -27,8 +27,12 @@ if(ABC_WITH_HTTP)
     list(APPEND ABC_CORE_SOURCES src/Http/HttpClient.cpp)
 endif()
 
-add_library(abc_core STATIC ${ABC_CORE_SOURCES})
+add_library(abc_core SHARED ${ABC_CORE_SOURCES})
 add_library(Abc::Core ALIAS abc_core)
+set_target_properties(abc_core PROPERTIES
+    OUTPUT_NAME "AbcCore"
+    WINDOWS_EXPORT_ALL_SYMBOLS ON)
+target_compile_definitions(abc_core PRIVATE ABC_CORE_EXPORTS)
 
 target_include_directories(abc_core
     PUBLIC

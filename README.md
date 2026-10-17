@@ -1,10 +1,10 @@
 # AbcCore
 
-Shared foundation library (static `abc_core`) for the Sven Co-op / MetaHookSv plugin family; the common dependency of AbcEssential and AbcUi.
+Shared foundation library (`AbcCore.dll`) for the Sven Co-op / MetaHookSv plugin family; the common dependency of AbcEssential and AbcUi.
 
 ## Build
 
-Windows + MSVC, CMake >= 4.2 (the default presets target the "Visual Studio 18 2026" generator), Win32 x86 only, C++20, static CRT:
+Windows + MSVC, CMake >= 4.2 (the default presets target the "Visual Studio 18 2026" generator), Win32 x86 only, C++20, static CRT. The build produces `AbcCore.dll` plus its `AbcCore.lib` import library:
 
 ```bash
 git clone --recursive https://github.com/DrAbcOfficial/AbcCore.git
@@ -41,7 +41,9 @@ add_subdirectory(thirdparty/AbcCore)
 target_link_libraries(MyPlugin PRIVATE Abc::Core)
 ```
 
-`abc_core` propagates the MetaHook / eventpp / AIGCJson / SteamSDK include paths as PUBLIC; plugin DLLs must not define `g_pInterface`, `gEngfuncs`, `g_pMetaHookAPI`, `g_pMetaSave` or `gExportfuncs` again (`Plugin.cpp` already provides one copy of each). See `include/abc/Plugin.h` for the entry-point pattern and the export macro.
+`abc_core` propagates the MetaHook / eventpp / AIGCJson / SteamSDK include paths as PUBLIC. Deploy `AbcCore.dll` to `<game>/svencoop/metahook/dlls/AbcCore/`; MetaHook adds every `metahook/dlls/*` subdirectory to `PATH`, so the plugin import tables resolve it at load time.
+
+Each plugin defines its own MetaHook globals in `src/CoreGlobals.cpp`. The inline `CAbcPluginBase` copies the host pointers into AbcCore.dll through the exported context setters, so both plugin code and the shared core see the same engine state. See `include/abc/Plugin.h` for the entry-point pattern.
 
 ## Submodules
 

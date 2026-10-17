@@ -6,7 +6,7 @@ namespace abc {
 static CTaskManager s_TaskManager;
 
 CTaskManager* GetTaskManager() {
-	// per-DLL instance (static lib)
+	// process-wide instance in AbcCore.dll
 	return &s_TaskManager;
 }
 bool CTaskManager::Has(ITaskItem* check){

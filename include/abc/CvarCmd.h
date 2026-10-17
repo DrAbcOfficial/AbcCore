@@ -46,7 +46,7 @@ void* SigScanReverse(void* startSearch, unsigned long searchLen, const char* pat
 // listed with ListAll().
 class CCvarRegistrar {
 public:
-	// per-DLL instance (static lib)
+	// process-wide instance in AbcCore.dll
 	static CCvarRegistrar* Get();
 
 	cvar_t* Create(const char* name, const char* def, int flags, cvar_callback_t callback = nullptr);
