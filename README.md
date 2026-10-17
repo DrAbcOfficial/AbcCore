@@ -4,7 +4,7 @@ Shared foundation library (`AbcCore.dll`) for the Sven Co-op / MetaHookSv plugin
 
 ## Build
 
-Windows + MSVC, CMake >= 4.2 (the default presets target the "Visual Studio 18 2026" generator), Win32 x86 only, C++20, static CRT. The build produces `AbcCore.dll` plus its `AbcCore.lib` import library:
+Windows + MSVC, CMake >= 4.2 (the default presets target the "Visual Studio 18 2026" generator), Win32 x86 only, C++20, dynamic CRT (`/MD`). The build produces `AbcCore.dll` plus its `AbcCore.lib` import library:
 
 ```bash
 git clone --recursive https://github.com/DrAbcOfficial/AbcCore.git
