@@ -97,8 +97,10 @@ public:
   static void ColorApplyAlpha(int &r, int &g, int &b, int a);
   // Legacy misspelling.
   static void ColorCalcuAlpha(int &r, int &g, int &b, int a);
+  static std::size_t ScalePixelLength(int contentLength, double fraction);
+  // Legacy name.
   static std::size_t GetScreenPixel(int length, double percent);
-  static void Vector2Rotate(vec2_t out, float x, float y, float rotate);
+  static void Vector2Rotate(vec2_t out, float x, float y, float radians);
 
   static void MatrixCopy(float in[4][3], float out[4][3]);
   static void VectorMA(const vec3_t veca, float scale, const vec3_t vecb,
@@ -115,6 +117,8 @@ public:
   static int Log2Floor(int val);
   // Legacy Quake-prefixed alias.
   static int Q_log2(int val);
+  static void ResetBounds(vec3_t mins, vec3_t maxs);
+  // Legacy name; resets to sentinel bounds, it does not zero them.
   static void ClearBounds(vec3_t mins, vec3_t maxs);
   // Any finite normal; zero normal leaves p unchanged. Aliasing is supported.
   static void ProjectPointOnPlane(vec3_t dst, const vec3_t p,

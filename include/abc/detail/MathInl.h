@@ -104,14 +104,19 @@ inline void CMathlib::ColorApplyAlpha(int &r, int &g, int &b, int a) {
 inline void CMathlib::ColorCalcuAlpha(int &r, int &g, int &b, int a) {
   ColorApplyAlpha(r, g, b, a);
 }
+inline std::size_t CMathlib::ScalePixelLength(int contentLength,
+                                              double fraction) {
+  return static_cast<std::size_t>(
+      static_cast<float>(contentLength) *
+      std::clamp(static_cast<float>(fraction), 0.0f, 1.0f));
+}
 inline std::size_t CMathlib::GetScreenPixel(int length, double percent) {
-  return (std::size_t)((float)length *
-                  std::clamp(static_cast<float>(percent), 0.0f, 1.0f));
+  return ScalePixelLength(length, percent);
 }
 inline void CMathlib::Vector2Rotate(vec2_t out, float x, float y,
-                                    float rotate) {
-  out[0] = x * std::cos(rotate) - y * std::sin(rotate);
-  out[1] = x * std::sin(rotate) + y * std::cos(rotate);
+                                    float radians) {
+  out[0] = x * std::cos(radians) - y * std::sin(radians);
+  out[1] = x * std::sin(radians) + y * std::cos(radians);
 }
 inline void CMathlib::ProjectPointOnPlane(vec3_t dst, const vec3_t p,
                                           const vec3_t normal) {
@@ -387,9 +392,12 @@ inline int CMathlib::Log2Floor(int val) {
   return static_cast<int>(std::bit_width(static_cast<unsigned>(val))) - 1;
 }
 inline int CMathlib::Q_log2(int val) { return Log2Floor(val); }
-inline void CMathlib::ClearBounds(vec3_t mins, vec3_t maxs) {
+inline void CMathlib::ResetBounds(vec3_t mins, vec3_t maxs) {
   mins[0] = mins[1] = mins[2] = 99999;
   maxs[0] = maxs[1] = maxs[2] = -99999;
+}
+inline void CMathlib::ClearBounds(vec3_t mins, vec3_t maxs) {
+  ResetBounds(mins, maxs);
 }
 inline void CMathlib::MatrixCopy(float in[4][3], float out[4][3]) {
   std::memcpy(out, in, sizeof(float) * 3 * 4);
