@@ -140,12 +140,9 @@ inline bool CMathlib::PointInPolygen(vec2_t p1, vec2_t p2, vec2_t p3, vec2_t p4,
   return PointInQuad(p1, p2, p3, p4, x, y);
 }
 
-#ifdef _WIN32
-#pragma optimize("", off)
-#endif
-
-// Original author disabled optimizer for this function to work around a
-// miscompilation; kept as-is.
+// The ABCEnchance original disabled the optimizer for this function to work
+// around a miscompilation. The workaround was removed after re-verifying the
+// result against a Rodrigues reference on MSVC 14.51.
 inline void CMathlib::RotatePointAroundVector(vec3_t dst, const vec3_t dir,
                                               const vec3_t point,
                                               float degrees) {
@@ -200,9 +197,6 @@ inline void CMathlib::RotatePointAroundVector(vec3_t dst, const vec3_t dir,
     dst[i] = rot[i][0] * point[0] + rot[i][1] * point[1] + rot[i][2] * point[2];
 }
 
-#ifdef _WIN32
-#pragma optimize("", on)
-#endif
 
 inline float CMathlib::AngleMod(float a) {
   a = (360.0f / 65536) * ((int)(a * (65536 / 360.0f)) & 65535);
