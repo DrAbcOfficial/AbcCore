@@ -163,3 +163,5 @@ public:
 };
 
 } // namespace abc
+
+#include "detail/MathInl.h"

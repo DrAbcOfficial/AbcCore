@@ -29,9 +29,13 @@ void SetClientExportFuncsThunk(void *exportFuncs) {
   abc::SetClientExportFuncs(static_cast<cl_exportfuncs_t *>(exportFuncs));
 }
 
+void SysErrorVThunk(const char *fmt, va_list args) {
+  abc::SysErrorV(fmt, args);
+}
+
 const AbcCoreApi kApi = {
     sizeof(AbcCoreApi),
-    1u,
+    2u,
     ApiVersion,
     abc::SetPluginName,
     SetContextThunk,

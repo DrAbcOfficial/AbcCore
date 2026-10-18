@@ -11,7 +11,7 @@
 
 #include <stdarg.h>
 
-#define ABC_CORE_INTERFACE_VERSION "AbcCore_API_001"
+#define ABC_CORE_INTERFACE_VERSION "AbcCore_API_002"
 
 typedef struct AbcCoreApi {
   unsigned int size;
@@ -22,6 +22,7 @@ typedef struct AbcCoreApi {
   void (*SetContext)(void *metaApi, void *interfacePtr, void *save);
   void (*SetEngineFuncs)(void *engineFuncs);
   void (*SetClientExportFuncs)(void *exportFuncs);
+  void (*SysErrorV)(const char *fmt, va_list args);
 
   // Console. The v-variants keep printf formatting in AbcCore.dll while the
   // C++ header only forwards va_list.

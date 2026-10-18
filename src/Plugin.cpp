@@ -16,19 +16,6 @@ metahook_api_t *g_pMetaHookAPI = nullptr;
 mh_enginesave_t *g_pMetaSave = nullptr;
 cl_exportfuncs_t gExportfuncs = {};
 
-// IPluginsV4 declares its virtuals without definitions (each plugin was
-// expected to implement them directly in the old layout). Now that
-// CAbcPluginBase derives and overrides them all, MSVC still emits references
-// to the base entries while building construction/destruction vtables.
-void IPluginsV4::Init(metahook_api_t *, mh_interface_t *, mh_enginesave_t *) {}
-void IPluginsV4::Shutdown(void) {}
-void IPluginsV4::LoadEngine(cl_enginefunc_t *) {}
-void IPluginsV4::LoadClient(cl_exportfuncs_t *) {}
-void IPluginsV4::ExitGame(int) {}
-const char *IPluginsV4::GetVersion(void) {
-  return "";
-}
-
 namespace abc {
 
 IFileSystem *g_pFileSystem = nullptr;
@@ -87,13 +74,17 @@ void SetClientExportFuncs(cl_exportfuncs_t *pExportFuncs) {
   g_dwClientSize = g_pMetaHookAPI->GetClientSize();
 }
 
-void SysError(const char *fmt, ...) {
+void SysErrorV(const char *fmt, va_list args) {
   char buf[1024];
+  _vsnprintf_s(buf, sizeof(buf), _TRUNCATE, fmt, args);
+  g_pMetaHookAPI->SysError("[%s]: %s", s_szPluginName, buf);
+}
+
+void SysError(const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
-  _vsnprintf_s(buf, sizeof(buf), _TRUNCATE, fmt, args);
+  SysErrorV(fmt, args);
   va_end(args);
-  g_pMetaHookAPI->SysError("[%s]: %s", s_szPluginName, buf);
 }
 
 } // namespace abc

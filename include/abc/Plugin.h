@@ -3,11 +3,10 @@
 // abc::Plugin - plugin base class + shared engine state.
 // Ported from ABCEnchance src/plugins.h/.cpp.
 //
-// Each plugin DLL defines the metahook.h globals once (src/CoreGlobals.cpp).
-// CAbcPluginBase copies the host pointers into AbcCore.dll through the
-// exported setters, so shared utilities and plugin code observe the same state.
-//
-// The abc:: state below is process-wide because it lives in AbcCore.dll.
+// Each plugin DLL defines the metahook.h globals and its own abc::g_* copies
+// in src/CoreGlobals.cpp. CAbcPluginBase refreshes those copies and forwards
+// the host pointers to AbcCore.dll through the C ABI table, so the DLL's
+// utilities observe the same state without exporting C++ data.
 
 #include <abc/AbcCoreInterface.h>
 #include <abc/Export.h>
@@ -32,32 +31,68 @@ inline const AbcCoreApi *CoreApi() {
 }
 
 // Filled in CAbcPluginBase::LoadEngine.
-extern ABC_CORE_API IFileSystem *g_pFileSystem;
-extern ABC_CORE_API DWORD g_dwEngineBuildnum;
-extern ABC_CORE_API int g_iEngineType;
-extern ABC_CORE_API PVOID g_dwEngineBase;
-extern ABC_CORE_API DWORD g_dwEngineSize;
-extern ABC_CORE_API PVOID g_dwEngineTextBase;
-extern ABC_CORE_API DWORD g_dwEngineTextSize;
-extern ABC_CORE_API PVOID g_dwEngineDataBase;
-extern ABC_CORE_API DWORD g_dwEngineDataSize;
-extern ABC_CORE_API PVOID g_dwEngineRdataBase;
-extern ABC_CORE_API DWORD g_dwEngineRdataSize;
+extern IFileSystem *g_pFileSystem;
+extern DWORD g_dwEngineBuildnum;
+extern int g_iEngineType;
+extern PVOID g_dwEngineBase;
+extern DWORD g_dwEngineSize;
+extern PVOID g_dwEngineTextBase;
+extern DWORD g_dwEngineTextSize;
+extern PVOID g_dwEngineDataBase;
+extern DWORD g_dwEngineDataSize;
+extern PVOID g_dwEngineRdataBase;
+extern DWORD g_dwEngineRdataSize;
 // Filled in CAbcPluginBase::LoadClient.
-extern ABC_CORE_API PVOID g_dwClientBase;
-extern ABC_CORE_API DWORD g_dwClientSize;
+extern PVOID g_dwClientBase;
+extern DWORD g_dwClientSize;
 
 // "[<plugin>]: ..." fatal error via AbcCore.dll's host context.
-ABC_CORE_API void SysError(const char *fmt, ...);
-ABC_CORE_API void SetPluginName(const char *name);
-ABC_CORE_API const char *PluginName();
+void SysErrorV(const char *fmt, va_list args);
+void SysError(const char *fmt, ...);
+void SetPluginName(const char *name);
+const char *PluginName();
 
-// Copy the host state into AbcCore.dll. Called by the inline CAbcPluginBase.
-ABC_CORE_API void SetCoreContext(metahook_api_t *pAPI,
-                                 mh_interface_t *pInterface,
-                                 mh_enginesave_t *pSave);
-ABC_CORE_API void SetEngineFuncs(cl_enginefunc_t *pEngineFuncs);
-ABC_CORE_API void SetClientExportFuncs(cl_exportfuncs_t *pExportFuncs);
+// Copy the host state into AbcCore.dll. Internal to the DLL; plugins reach
+// them through AbcCoreApi.
+void SetCoreContext(metahook_api_t *pAPI, mh_interface_t *pInterface,
+                    mh_enginesave_t *pSave);
+void SetEngineFuncs(cl_enginefunc_t *pEngineFuncs);
+void SetClientExportFuncs(cl_exportfuncs_t *pExportFuncs);
+
+#ifndef ABC_CORE_EXPORTS
+inline void SysErrorV(const char *fmt, va_list args) {
+  if (const AbcCoreApi *api = CoreApi())
+    api->SysErrorV(fmt, args);
+}
+inline void SysError(const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  SysErrorV(fmt, args);
+  va_end(args);
+}
+#endif
+
+// Fill the plugin-local abc:: state from the host pointers. Core keeps its
+// own copy in AbcCore.dll; these globals no longer cross the DLL boundary.
+inline void RefreshSharedState() {
+  if (!g_pInterface || !g_pMetaHookAPI)
+    return;
+  g_pFileSystem = g_pInterface->FileSystem;
+  g_iEngineType = g_pMetaHookAPI->GetEngineType();
+  g_dwEngineBuildnum = g_pMetaHookAPI->GetEngineBuildnum();
+  g_dwEngineBase = g_pMetaHookAPI->GetEngineBase();
+  g_dwEngineSize = g_pMetaHookAPI->GetEngineSize();
+  g_dwEngineTextBase = (PVOID)g_pMetaHookAPI->GetSectionByName(
+      g_dwEngineBase, ".text\x0\x0\x0", &g_dwEngineTextSize);
+  g_dwEngineDataBase = (PVOID)g_pMetaHookAPI->GetSectionByName(
+      g_dwEngineBase, ".data\x0\x0\x0", &g_dwEngineDataSize);
+  g_dwEngineRdataBase = (PVOID)g_pMetaHookAPI->GetSectionByName(
+      g_dwEngineBase, ".rdata\x0\x0", &g_dwEngineRdataSize);
+  if (g_pMetaHookAPI->GetClientBase) {
+    g_dwClientBase = g_pMetaHookAPI->GetClientBase();
+    g_dwClientSize = g_pMetaHookAPI->GetClientSize();
+  }
+}
 
 // Base class every Abc plugin DLL exposes. Derived classes override the
 // OnXxx hooks only; the IPluginsV4 plumbing (globals, engine type check,
@@ -74,8 +109,6 @@ public:
                 pluginName, version);
     if (const AbcCoreApi *api = CoreApi())
       api->SetPluginName(pluginName);
-    else
-      SetPluginName(pluginName);
   }
 
   void Init(metahook_api_t *pAPI, mh_interface_t *pInterface,
@@ -85,8 +118,6 @@ public:
     g_pMetaSave = pSave;
     if (const AbcCoreApi *api = CoreApi())
       api->SetContext(pAPI, pInterface, pSave);
-    else
-      SetCoreContext(pAPI, pInterface, pSave);
     OnInit();
   }
 
@@ -96,10 +127,9 @@ public:
 
   void LoadEngine(cl_enginefunc_t *pEngineFuncs) final {
     memcpy(&gEngfuncs, pEngineFuncs, sizeof(gEngfuncs));
+    RefreshSharedState();
     if (const AbcCoreApi *api = CoreApi())
       api->SetEngineFuncs(pEngineFuncs);
-    else
-      SetEngineFuncs(pEngineFuncs);
 
     if (g_iEngineType != ENGINE_SVENGINE) {
       SysError(
@@ -113,10 +143,9 @@ public:
 
   void LoadClient(cl_exportfuncs_t *pExportFuncs) final {
     memcpy(&gExportfuncs, pExportFuncs, sizeof(gExportfuncs));
+    RefreshSharedState();
     if (const AbcCoreApi *api = CoreApi())
       api->SetClientExportFuncs(pExportFuncs);
-    else
-      SetClientExportFuncs(pExportFuncs);
     OnLoadClient(pExportFuncs);
   }
 
@@ -151,3 +180,15 @@ private:
 };
 
 } // namespace abc
+
+// IPluginsV4 base entries. Defined inline so a plugin does not import C++
+// virtuals from AbcCore.dll; CAbcPluginBase overrides all of them.
+inline void IPluginsV4::Init(metahook_api_t *, mh_interface_t *,
+                             mh_enginesave_t *) {}
+inline void IPluginsV4::Shutdown(void) {}
+inline void IPluginsV4::LoadEngine(cl_enginefunc_t *) {}
+inline void IPluginsV4::LoadClient(cl_exportfuncs_t *) {}
+inline void IPluginsV4::ExitGame(int) {}
+inline const char *IPluginsV4::GetVersion(void) {
+  return "";
+}

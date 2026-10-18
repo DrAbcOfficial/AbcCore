@@ -20,7 +20,7 @@ cmake --build --preset win32-debug   # Release: win32-release
 |---|---|
 | `Plugin.h` | Inline `CAbcPluginBase` (IPluginsV4 skeleton, engine-side checks and info) and the setters that copy host state into AbcCore.dll. Each plugin still defines the five metahook globals in its own `src/CoreGlobals.cpp`. |
 | `Format.h` / `NetMsg.h` | Type-safe positional-placeholder formatting (not an RML/command escaper); strict NUL/boundary message reads |
-| `AbcCoreInterface.h` | Valve-style C ABI: `AbcCore_CreateInterface` returns the versioned `AbcCoreApi` function table (interface version `AbcCore_API_001`) |
+| `AbcCoreInterface.h` | Valve-style C ABI: `AbcCore_CreateInterface` returns the versioned `AbcCoreApi` function table (interface version `AbcCore_API_002`) |
 | `Parse.h` | Strict, locale-independent `ParseNumber` / `ParseInt` / `ParseFloat` (whole-view consumption, `std::optional` result, no exceptions) |
 | `Console.h` | `ConsolePrint/Warn/Error/Writeline` (through `gEngfuncs.Con_Printf`) |
 | `CvarCmd.h` | `CREATE_CVAR`, `ADD_COMMAND`, `ServerCmd` / `EngineClientCmd`, `abc::SigScan`, `CCvarRegistrar` |
@@ -50,10 +50,10 @@ table is append-only within an interface version, so plugin binaries do not
 depend on C++ class layout, STL types or the MSVC C++ ABI. `CAbcPluginBase`
 resolves the table once and uses it for the lifecycle calls.
 
-The existing C++ utility symbols are still exported with
-`WINDOWS_EXPORT_ALL_SYMBOLS` for in-tree consumers; new cross-DLL surface
-should be appended to the C table instead of adding another exported C++
-symbol.
+`WINDOWS_EXPORT_ALL_SYMBOLS` is OFF: AbcCore.dll exports only the C ABI
+factory. Task/Events/Math/Config are header-only per plugin; Console/Cvar/Paths
+and lifecycle calls go through `AbcCoreApi`. New cross-DLL surface must be
+appended to the C table.
 
 ## Using AbcCore downstream
 
@@ -63,9 +63,9 @@ target_link_libraries(MyPlugin PRIVATE Abc::Core)
 ```
 
 `abc_core` propagates the MetaHook / eventpp / AIGCJson / SteamSDK include paths
-as PUBLIC. The plugin DLL still defines the five metahook globals in its own
-`src/CoreGlobals.cpp`; `CAbcPluginBase` copies them into AbcCore.dll through
-the exported setters. At runtime place `AbcCore.dll` where the loader resolves
+as PUBLIC. The plugin DLL defines the five metahook globals and its local
+`abc::g_*` copies in `src/CoreGlobals.cpp`; `CAbcPluginBase` refreshes them and
+forwards the host state to AbcCore.dll through the C ABI. At runtime place `AbcCore.dll` where the loader resolves
 it (the aggregate package uses `svencoop/metahook/dlls/AbcCore/`). See
 `include/abc/Plugin.h` for the entry-point pattern and the export macro.
 

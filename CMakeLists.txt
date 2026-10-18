@@ -10,15 +10,10 @@ option(ABC_WITH_HTTP "Build the optional abc::Http module (needs UtilHTTPClient 
 
 set(ABC_CORE_SOURCES
     src/Core.cpp
-    src/Math.cpp
     src/Plugin.cpp
     src/AbcCoreInterface.cpp
     src/Console.cpp
     src/CvarCmd.cpp
-    src/Task.cpp
-    src/Events.cpp
-    src/ConfigFile.cpp
-    src/Config.cpp
     src/Paths.cpp
     src/Platform.cpp
     src/SteamId.cpp
@@ -32,7 +27,7 @@ add_library(abc_core SHARED ${ABC_CORE_SOURCES})
 add_library(Abc::Core ALIAS abc_core)
 set_target_properties(abc_core PROPERTIES
     OUTPUT_NAME "AbcCore"
-    WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    WINDOWS_EXPORT_ALL_SYMBOLS OFF)
 target_compile_definitions(abc_core PRIVATE ABC_CORE_EXPORTS)
 
 target_include_directories(abc_core

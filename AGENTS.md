@@ -12,7 +12,7 @@ Guidance for AI/automation collaborators working in this repository. Read `READM
 ## Build
 
 Win32 x86 only / C++20 / dynamic CRT (/MD); the target is `AbcCore.dll`
-(`OUTPUT_NAME AbcCore`, `WINDOWS_EXPORT_ALL_SYMBOLS`). `ABC_GAME_DIR` is
+(`OUTPUT_NAME AbcCore`, `WINDOWS_EXPORT_ALL_SYMBOLS OFF`, one C ABI export). `ABC_GAME_DIR` is
 optional: unset means the gamedata catalog is still generated under
 `PROJECT_BINARY_DIR/assets/...` and `install` uses its relative destination
 instead of a game root.
@@ -27,13 +27,13 @@ cmake --build --preset win32-debug    # Release: win32-release
 - Public headers expose their contract types (`AIGCJson` for `Config`,
   eventpp for `Events`, SteamSDK for `SteamId`); this is intentional. New
   headers still include the standard headers they use directly.
-- AbcCore is a shared library. The stable plugin-facing surface is the
-  versioned C ABI table in `include/abc/AbcCoreInterface.h`, reached through
-  `AbcCore_CreateInterface`; append fields instead of changing existing ones.
-  The legacy C++ symbols still exported by `WINDOWS_EXPORT_ALL_SYMBOLS` are
-  for in-tree consumers and must not be treated as a new ABI promise.
-- Plugins define the five metahook globals in their own `src/CoreGlobals.cpp`;
-  `CAbcPluginBase` copies them into AbcCore.dll via the interface setters.
+- AbcCore is a shared library. The plugin-facing surface is the versioned C ABI
+  table in `include/abc/AbcCoreInterface.h`, reached through
+  `AbcCore_CreateInterface`; append fields and bump the interface version.
+  `WINDOWS_EXPORT_ALL_SYMBOLS` stays OFF - do not add exported C++ symbols.
+- Plugins define the five metahook globals and their local `abc::g_*` copies in
+  their own `src/CoreGlobals.cpp`; `CAbcPluginBase` refreshes them and forwards
+  host state to AbcCore.dll.
 - Formatting follows LLVM (2 spaces, 80 columns, attached braces). Identifier
   casing follows the repository conventions: public API functions are
   UpperCamelCase, types are `C`-prefixed or UpperCamelCase, legacy members keep
