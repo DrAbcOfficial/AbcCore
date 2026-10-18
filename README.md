@@ -25,7 +25,7 @@ cmake --build --preset win32-debug   # Release: win32-release
 | `Console.h` | `ConsolePrint/Warn/Error/Writeline` (through `gEngfuncs.Con_Printf`) |
 | `CvarCmd.h` | `CREATE_CVAR`, `ADD_COMMAND`, `ServerCmd` / `EngineClientCmd`, `abc::SigScan`, `CCvarRegistrar` |
 | `Events.h` | eventpp vocabulary, `CChainedCommand` (hook a command, let subscribers vote, chain back to the original), `DispatchToMainThread` |
-| `Math.h` | `vec2_t` / `vec3_t` / `mat4` typedefs + `abc::CMathlib`; `k`-prefixed constants (`kPi`, `kDegToRad`, ...) with deprecated legacy spellings; `AngleVectorsTranspose` returns the transposed basis |
+| `Math.h` | `vec2_t` / `vec3_t` / `mat4` typedefs + `abc::CMathlib`, with an `abc::math` forwarding namespace; `k`-prefixed constants (`kPi`, `kDegToRad`, ...) with deprecated legacy spellings; `AngleVectorsTranspose` returns the transposed basis |
 | `Config.h` | `JsonLoad` / `JsonSave` (annotated struct <-> `<mod>/config.json`; reads through IFileSystem, writes through Win32 atomic replace keeping a `.bak`) |
 | `Task.h` | Background worker tasks + main-thread continuations (the host calls `abc::GetTaskManager().CheckAll()` every frame) |
 | `Paths.h` | `GameDir` / `ModPath` / `EnsureDir` / `EnsureParentDir` / `CheckAsset` |
@@ -38,8 +38,11 @@ cmake --build --preset win32-debug   # Release: win32-release
 GoldSrc `[roll, pitch, yaw]` mapping. New code should use the canonical helper
 names (`VectorMultiply`, `ColorApplyAlpha`, `PointInQuad`, `AngleMod`, `IsNaN`,
 `DegToRad`, `RadToDeg`, `Log2Floor`, `RoundHalfUp`, `Vector2Copy`, `ResetBounds`,
-`ScalePixelLength`); the legacy spellings remain as forwards. The reserved
-`_Vector*` aliases and the unused `fixed*_t` / angle constants were removed.
+`ScalePixelLength`); the legacy spellings remain as forwards. New code may
+also use the `abc::math` namespace (`abc::math::VectorCopy`,
+`abc::math::kPi`), which forwards to the same helpers; `abc::CMathlib` remains
+the compatibility surface. The reserved `_Vector*` aliases and the unused
+`fixed*_t` / angle constants were removed.
 
 `cmake/AbcCommon.cmake` is shared with the plugin repositories through `add_subdirectory`; `cmake/AbcGameData.cmake` provides the gamedata manifest sync/validation helpers using the bundled Python tooling in `cmake/gamedata/`.
 
