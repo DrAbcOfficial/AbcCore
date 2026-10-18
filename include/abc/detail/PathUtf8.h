@@ -11,8 +11,8 @@
 namespace abc::detail {
 
 inline std::filesystem::path PathFromUtf8(std::string_view Text) {
-  return std::filesystem::path(
-      std::u8string(reinterpret_cast<const char8_t *>(Text.data()), Text.size()));
+  return std::filesystem::path(std::u8string(
+      reinterpret_cast<const char8_t *>(Text.data()), Text.size()));
 }
 
 } // namespace abc::detail

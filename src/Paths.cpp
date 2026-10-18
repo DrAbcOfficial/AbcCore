@@ -38,9 +38,8 @@ bool EnsureDir(const char *relativeDir) {
   if (!relativeDir || !*GameDir())
     return false;
   std::error_code ec;
-  std::filesystem::create_directories(std::filesystem::path(GameDir()) /
-                                          detail::PathFromUtf8(relativeDir),
-                                      ec);
+  std::filesystem::create_directories(
+      std::filesystem::path(GameDir()) / detail::PathFromUtf8(relativeDir), ec);
   if (ec) {
     ConsoleWarn("Couldn't create directory %s (%s)\n", relativeDir,
                 ec.message().c_str());
@@ -52,8 +51,8 @@ bool EnsureDir(const char *relativeDir) {
 bool EnsureParentDir(const char *relativeFilePath) {
   if (!relativeFilePath || !*GameDir())
     return false;
-  std::filesystem::path p = std::filesystem::path(GameDir()) /
-                            detail::PathFromUtf8(relativeFilePath);
+  std::filesystem::path p =
+      std::filesystem::path(GameDir()) / detail::PathFromUtf8(relativeFilePath);
   std::filesystem::path parent = p.parent_path();
   if (parent.empty())
     return true;

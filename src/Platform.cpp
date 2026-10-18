@@ -46,8 +46,8 @@ std::string Win32GetStringValueFromRegistry(HKEY hKey,
                                             const std::string &valueName) {
   std::string result;
   DWORD size = 0;
-  if (RegGetValueA(hKey, subKey.c_str(), valueName.c_str(), RRF_RT_REG_SZ, nullptr,
-                   nullptr, &size) == ERROR_SUCCESS) {
+  if (RegGetValueA(hKey, subKey.c_str(), valueName.c_str(), RRF_RT_REG_SZ,
+                   nullptr, nullptr, &size) == ERROR_SUCCESS) {
     char *buffer = new char[size];
     if (RegGetValueA(hKey, subKey.c_str(), valueName.c_str(), RRF_RT_REG_SZ,
                      nullptr, buffer, &size) == ERROR_SUCCESS)
@@ -146,8 +146,8 @@ std::vector<unsigned char> Win32ConvertHICONToRGBA(HICON hIcon, size_t &ww,
     return {};
   }
   std::memset(bits, 0, rgba.size());
-  const bool ok =
-      DrawIconEx(dc, 0, 0, hIcon, width, height, 0, nullptr, DI_NORMAL) != FALSE;
+  const bool ok = DrawIconEx(dc, 0, 0, hIcon, width, height, 0, nullptr,
+                             DI_NORMAL) != FALSE;
   if (ok)
     for (size_t i = 0; i < rgba.size(); i += 4) {
       rgba[i] = bits[i + 2];

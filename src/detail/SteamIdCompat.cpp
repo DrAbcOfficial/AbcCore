@@ -149,7 +149,7 @@ void CSteamID::SetFromString(const char *pchSteamID,
 //-----------------------------------------------------------------------------
 // Purpose: Renders the steam ID to a buffer.  NOTE: for convenience of calling
 //			code, this code returns a pointer to a thread-local ring
-//buffer (valid until four more renders on this thread).
+// buffer (valid until four more renders on this thread).
 // Output:  buffer with rendered Steam ID
 //-----------------------------------------------------------------------------
 const char *CSteamID::Render() const {
@@ -221,7 +221,7 @@ const char *CSteamID::Render() const {
 // Purpose: Renders the passed-in steam ID to a buffer.  NOTE: for convenience
 // of calling
 //			code, this code returns a pointer to a thread-local ring
-//buffer (valid until four more renders on this thread).
+// buffer (valid until four more renders on this thread).
 // Input:	64-bit representation of Steam ID to render
 // Output:  buffer with rendered Steam ID
 //-----------------------------------------------------------------------------
