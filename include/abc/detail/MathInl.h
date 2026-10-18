@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <numeric>
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -653,17 +654,9 @@ inline void CMathlib::FloorDivMod(double numer, double denom, int *quotient,
   *rem = r;
 }
 inline int CMathlib::GreatestCommonDivisor(int i1, int i2) {
-  if (i1 > i2) {
-    if (i2 == 0)
-      return (i1);
-
-    return GreatestCommonDivisor(i2, i1 % i2);
-  } else {
-    if (i1 == 0)
-      return (i2);
-
-    return GreatestCommonDivisor(i1, i2 % i1);
-  }
+  // std::gcd also accepts the negative and zero combinations that made the
+  // old recursive Quake implementation recurse forever.
+  return std::gcd(i1, i2);
 }
 inline int CMathlib::InvertMatrix(const float *m, float *out) {
 #define SWAP_ROWS(a, b)                                                        \

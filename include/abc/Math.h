@@ -126,6 +126,7 @@ public:
                                          const vec3_t origin, float scale);
 
   static void FloorDivMod(double numer, double denom, int *quotient, int *rem);
+  // Euclidean gcd; non-negative result, negative inputs accepted.
   static int GreatestCommonDivisor(int i1, int i2);
   static void RotatePointAroundVector(vec3_t dst, const vec3_t dir,
                                       const vec3_t point, float degrees);
