@@ -96,7 +96,6 @@ public:
   static void VectorReverse(vec3_t a);
   static void Q_Vector2Copy(vec2_t a, vec2_t b);
   static void VectorClear(vec3_t a);
-  static float DotProduct(vec3_t x, vec3_t y);
   static float DotProduct(const vec3_t x, const vec3_t y);
   static void ColorCalcuAlpha(int &r, int &g, int &b, int a);
   template <typename T> static T max3(T a, T b, T c) {

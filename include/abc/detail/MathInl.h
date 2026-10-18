@@ -87,9 +87,6 @@ inline void CMathlib::Q_Vector2Copy(vec2_t a, vec2_t b) {
 inline void CMathlib::VectorClear(vec3_t a) {
   (a)[0] = (a)[1] = (a)[2] = 0.0;
 }
-inline float CMathlib::DotProduct(vec3_t x, vec3_t y) {
-  return ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2]);
-}
 inline float CMathlib::DotProduct(const vec3_t x, const vec3_t y) {
   return ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2]);
 }
