@@ -113,7 +113,9 @@ public:
   static void AngleIMatrix(const vec3_t angles, float matrix[3][4]);
   static void AngleQuaternion(const vec3_t angles, vec4_t quaternion);
   static void QuaternionMatrix(const vec4_t quaternion, float (*matrix)[4]);
-  static void QuaternionSlerp(const vec4_t p, vec4_t q, float t, vec4_t qt);
+  // Does not modify p or q.
+  static void QuaternionSlerp(const vec4_t p, const vec4_t q, float t,
+                              vec4_t qt);
   static void SinCos(float radians, float *sine, float *cosine);
 
   static void R_ConcatRotations(float in1[3][3], float in2[3][3],

@@ -585,25 +585,27 @@ inline void CMathlib::QuaternionMatrix(const vec4_t quaternion,
   matrix[2][2] = 1.0f - 2.0f * quaternion[0] * quaternion[0] -
                  2.0f * quaternion[1] * quaternion[1];
 }
-inline void CMathlib::QuaternionSlerp(const vec4_t p, vec4_t q, float t,
+inline void CMathlib::QuaternionSlerp(const vec4_t p, const vec4_t q, float t,
                                       vec4_t qt) {
   int i;
   float sclp, sclq;
+  vec4_t qq;
+  std::copy_n(q, 4, qq);
 
   float a = 0;
   float b = 0;
 
   for (i = 0; i < 4; i++) {
-    a += (p[i] - q[i]) * (p[i] - q[i]);
-    b += (p[i] + q[i]) * (p[i] + q[i]);
+    a += (p[i] - qq[i]) * (p[i] - qq[i]);
+    b += (p[i] + qq[i]) * (p[i] + qq[i]);
   }
 
   if (a > b) {
     for (i = 0; i < 4; i++)
-      q[i] = -q[i];
+      qq[i] = -qq[i];
   }
 
-  float cosom = p[0] * q[0] + p[1] * q[1] + p[2] * q[2] + p[3] * q[3];
+  float cosom = p[0] * qq[0] + p[1] * qq[1] + p[2] * qq[2] + p[3] * qq[3];
 
   if ((1.0 + cosom) > 0.00000001) {
     if ((1.0 - cosom) > 0.00000001) {
@@ -617,7 +619,7 @@ inline void CMathlib::QuaternionSlerp(const vec4_t p, vec4_t q, float t,
     }
 
     for (i = 0; i < 4; i++)
-      qt[i] = sclp * p[i] + sclq * q[i];
+      qt[i] = sclp * p[i] + sclq * qq[i];
   } else {
     qt[0] = -p[1];
     qt[1] = p[0];
