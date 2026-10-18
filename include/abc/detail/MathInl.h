@@ -794,13 +794,38 @@ inline void CMathlib::SinCos(float radians, float *sine, float *cosine) {
   *sine = std::sin(radians);
   *cosine = std::cos(radians);
 }
+
+namespace detail {
+// Writes the affine entity matrix from precomputed yaw/pitch/roll sines and
+// cosines. A non-rotated axis is passed as sy=sp=sr=0 and cy=cp=cr=1.
+inline void WriteEntityMatrix(float out[4][4], const vec3_t origin, float scale,
+                              float sy, float cy, float sp, float cp,
+                              float sr, float cr) {
+  out[0][0] = (cp * cy) * scale;
+  out[0][1] = (sr * sp * cy + cr * -sy) * scale;
+  out[0][2] = (cr * sp * cy + -sr * -sy) * scale;
+  out[0][3] = origin[0];
+  out[1][0] = (cp * sy) * scale;
+  out[1][1] = (sr * sp * sy + cr * cy) * scale;
+  out[1][2] = (cr * sp * sy + -sr * cy) * scale;
+  out[1][3] = origin[1];
+  out[2][0] = (-sp) * scale;
+  out[2][1] = (sr * cp) * scale;
+  out[2][2] = (cr * cp) * scale;
+  out[2][3] = origin[2];
+  out[3][0] = out[3][1] = out[3][2] = 0.0f;
+  out[3][3] = 1.0f;
+}
+} // namespace detail
+
 inline void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4],
                                                  const vec3_t angles,
                                                  const vec3_t origin,
                                                  float scale) {
-  out[3][0] = out[3][1] = out[3][2] = 0;
-  out[3][3] = 1;
-  float angle, sr, sp, sy, cr, cp, cy;
+  float sy = 0.0f, cy = 1.0f;
+  float sp = 0.0f, cp = 1.0f;
+  float sr = 0.0f, cr = 1.0f;
+  float angle;
   if (angles[kRoll]) {
     angle = angles[kYaw] * mathlib::kDegToRad;
     SinCos(angle, &sy, &cy);
@@ -808,67 +833,16 @@ inline void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4],
     SinCos(angle, &sp, &cp);
     angle = angles[kRoll] * mathlib::kDegToRad;
     SinCos(angle, &sr, &cr);
-
-    out[0][0] = (cp * cy) * scale;
-    out[0][1] = (sr * sp * cy + cr * -sy) * scale;
-    out[0][2] = (cr * sp * cy + -sr * -sy) * scale;
-    out[0][3] = origin[0];
-    out[1][0] = (cp * sy) * scale;
-    out[1][1] = (sr * sp * sy + cr * cy) * scale;
-    out[1][2] = (cr * sp * sy + -sr * cy) * scale;
-    out[1][3] = origin[1];
-    out[2][0] = (-sp) * scale;
-    out[2][1] = (sr * cp) * scale;
-    out[2][2] = (cr * cp) * scale;
-    out[2][3] = origin[2];
   } else if (angles[kPitch]) {
     angle = angles[kYaw] * mathlib::kDegToRad;
     SinCos(angle, &sy, &cy);
     angle = angles[kPitch] * mathlib::kDegToRad;
     SinCos(angle, &sp, &cp);
-
-    out[0][0] = (cp * cy) * scale;
-    out[0][1] = (-sy) * scale;
-    out[0][2] = (sp * cy) * scale;
-    out[0][3] = origin[0];
-    out[1][0] = (cp * sy) * scale;
-    out[1][1] = (cy)*scale;
-    out[1][2] = (sp * sy) * scale;
-    out[1][3] = origin[1];
-    out[2][0] = (-sp) * scale;
-    out[2][1] = 0.0f;
-    out[2][2] = (cp)*scale;
-    out[2][3] = origin[2];
   } else if (angles[kYaw]) {
     angle = angles[kYaw] * mathlib::kDegToRad;
     SinCos(angle, &sy, &cy);
-
-    out[0][0] = (cy)*scale;
-    out[0][1] = (-sy) * scale;
-    out[0][2] = 0.0f;
-    out[0][3] = origin[0];
-    out[1][0] = (sy)*scale;
-    out[1][1] = (cy)*scale;
-    out[1][2] = 0.0f;
-    out[1][3] = origin[1];
-    out[2][0] = 0.0f;
-    out[2][1] = 0.0f;
-    out[2][2] = scale;
-    out[2][3] = origin[2];
-  } else {
-    out[0][0] = scale;
-    out[0][1] = 0.0f;
-    out[0][2] = 0.0f;
-    out[0][3] = origin[0];
-    out[1][0] = 0.0f;
-    out[1][1] = scale;
-    out[1][2] = 0.0f;
-    out[1][3] = origin[1];
-    out[2][0] = 0.0f;
-    out[2][1] = 0.0f;
-    out[2][2] = scale;
-    out[2][3] = origin[2];
   }
+  detail::WriteEntityMatrix(out, origin, scale, sy, cy, sp, cp, sr, cr);
 }
 inline void CMathlib::Matrix4x4_ConcatTransforms(float out[4][4],
                                                  float in1[4][4],
