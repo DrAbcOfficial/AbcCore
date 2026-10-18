@@ -93,6 +93,7 @@ public:
   static void VectorAddFloat(vec3_t a, float f);
   static void VectorMultipiler(vec3_t a, float f);
   static void VectorCopy(const vec3_t src, vec3_t dst);
+  // Legacy alias for VectorInverse.
   static void VectorReverse(vec3_t a);
   static void Q_Vector2Copy(vec2_t a, vec2_t b);
   static void VectorClear(vec3_t a);
@@ -140,6 +141,7 @@ public:
 
   static void R_ConcatRotations(float in1[3][3], float in2[3][3],
                                 float out[3][3]);
+  // Legacy Renderer-style alias for ConcatTransforms.
   static void R_ConcatTransforms(float in1[3][4], float in2[3][4],
                                  float out[3][4]);
   // Affine row-major matrices; angles are pitch/yaw/roll degrees. Writes

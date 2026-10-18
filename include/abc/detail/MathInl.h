@@ -75,11 +75,7 @@ inline void CMathlib::VectorCopy(const vec3_t src, vec3_t dst) {
   (dst)[1] = (src)[1];
   (dst)[2] = (src)[2];
 }
-inline void CMathlib::VectorReverse(vec3_t a) {
-  (a[0]) = -a[0];
-  (a[1]) = -a[1];
-  (a[2]) = -a[2];
-}
+inline void CMathlib::VectorReverse(vec3_t a) { VectorInverse(a); }
 inline void CMathlib::Q_Vector2Copy(vec2_t a, vec2_t b) {
   (b)[0] = (a)[0];
   (b)[1] = (a)[1];
@@ -473,30 +469,7 @@ inline void CMathlib::R_ConcatRotations(float in1[3][3], float in2[3][3],
 }
 inline void CMathlib::R_ConcatTransforms(float in1[3][4], float in2[3][4],
                                          float out[3][4]) {
-  out[0][0] =
-      in1[0][0] * in2[0][0] + in1[0][1] * in2[1][0] + in1[0][2] * in2[2][0];
-  out[0][1] =
-      in1[0][0] * in2[0][1] + in1[0][1] * in2[1][1] + in1[0][2] * in2[2][1];
-  out[0][2] =
-      in1[0][0] * in2[0][2] + in1[0][1] * in2[1][2] + in1[0][2] * in2[2][2];
-  out[0][3] = in1[0][0] * in2[0][3] + in1[0][1] * in2[1][3] +
-              in1[0][2] * in2[2][3] + in1[0][3];
-  out[1][0] =
-      in1[1][0] * in2[0][0] + in1[1][1] * in2[1][0] + in1[1][2] * in2[2][0];
-  out[1][1] =
-      in1[1][0] * in2[0][1] + in1[1][1] * in2[1][1] + in1[1][2] * in2[2][1];
-  out[1][2] =
-      in1[1][0] * in2[0][2] + in1[1][1] * in2[1][2] + in1[1][2] * in2[2][2];
-  out[1][3] = in1[1][0] * in2[0][3] + in1[1][1] * in2[1][3] +
-              in1[1][2] * in2[2][3] + in1[1][3];
-  out[2][0] =
-      in1[2][0] * in2[0][0] + in1[2][1] * in2[1][0] + in1[2][2] * in2[2][0];
-  out[2][1] =
-      in1[2][0] * in2[0][1] + in1[2][1] * in2[1][1] + in1[2][2] * in2[2][1];
-  out[2][2] =
-      in1[2][0] * in2[0][2] + in1[2][1] * in2[1][2] + in1[2][2] * in2[2][2];
-  out[2][3] = in1[2][0] * in2[0][3] + in1[2][1] * in2[1][3] +
-              in1[2][2] * in2[2][3] + in1[2][3];
+  ConcatTransforms(in1, in2, out);
 }
 inline void CMathlib::VectorRotate(const vec3_t in1, const float in2[3][4],
                                    vec3_t out) {
