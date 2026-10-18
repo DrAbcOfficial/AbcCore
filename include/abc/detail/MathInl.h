@@ -401,12 +401,7 @@ inline void CMathlib::VectorScale(const vec3_t in, vec_t scale, vec3_t out) {
 inline int CMathlib::Q_log2(int val) {
   if (val <= 0)
     return 0;
-  int answer = 0;
-
-  while (val >>= 1)
-    answer++;
-
-  return answer;
+  return static_cast<int>(std::bit_width(static_cast<unsigned>(val))) - 1;
 }
 inline void CMathlib::ClearBounds(vec3_t mins, vec3_t maxs) {
   mins[0] = mins[1] = mins[2] = 99999;
