@@ -8,9 +8,6 @@
 // NetworkMessages data layer (plan 05 §4) extends this reader instead of
 // forking a second one.
 
-#ifndef ABC_NETMSG_H
-#define ABC_NETMSG_H
-
 #include <cstdint>
 #include <cstring>
 #include <string>
@@ -117,5 +114,3 @@ private:
 };
 
 } // namespace abc
-
-#endif // ABC_NETMSG_H

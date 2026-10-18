@@ -10,11 +10,6 @@
 // at runtime. No current consumer (the NetEase integration was dropped); the
 // interface must stay a soft dependency.
 
-#ifndef ABC_HTTP_H
-#define ABC_HTTP_H
-
 #if defined(ABC_WITH_HTTP)
 #include <abc/Http/HttpClient.h>
 #endif
-
-#endif // ABC_HTTP_H

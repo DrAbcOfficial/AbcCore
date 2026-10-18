@@ -8,9 +8,6 @@
 // explicitly. No steam_api.dll dependency: only string/number parsing lives
 // here; avatar/friends data goes through AbcUi's SteamAPIBridge (D-07).
 
-#ifndef ABC_STEAMID_H
-#define ABC_STEAMID_H
-
 #include <steamclientpublic.h>
 
 namespace abc {
@@ -26,5 +23,3 @@ CSteamID ParseSteamID(const char *text);
 const char *RenderSteamID(const CSteamID &id);
 
 } // namespace abc
-
-#endif // ABC_STEAMID_H

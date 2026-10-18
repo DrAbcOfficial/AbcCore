@@ -9,9 +9,6 @@
 // registry parsing (Win32GetFileIconByExtension) against real registry data
 // before wiring the first call site.
 
-#ifndef ABC_PLATFORM_H
-#define ABC_PLATFORM_H
-
 #ifdef _WIN32
 #include <windows.h>
 #include <string>
@@ -37,5 +34,3 @@ void Win32GetRegKeyValue(char *pszSubKey, char *pszElement,
 } // namespace abc
 
 #endif //_WIN32
-
-#endif // ABC_PLATFORM_H

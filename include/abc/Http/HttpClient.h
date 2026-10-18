@@ -26,9 +26,6 @@
 // ClearAll() is the one synchronous path and must only run after the client
 // itself is torn down (CHttpClient::ShutDown order).
 
-#ifndef ABC_HTTPCLIENT_H
-#define ABC_HTTPCLIENT_H
-
 #include <string>
 #include <vector>
 #include <cstddef>
@@ -161,5 +158,3 @@ private:
 CHttpClient *GetHttpClient();
 
 } // namespace abc
-
-#endif // ABC_HTTPCLIENT_H

@@ -6,9 +6,6 @@
 // called via extern - core code must not depend on UI, so the colored variants
 // degrade to plain text with a tag prefix here.
 
-#ifndef ABC_CONSOLE_H
-#define ABC_CONSOLE_H
-
 namespace abc {
 
 // Raw Con_Printf passthrough.
@@ -24,5 +21,3 @@ void ConsoleError(const char *fmt, ...);
 void ConsoleWriteline(const char *text);
 
 } // namespace abc
-
-#endif // ABC_CONSOLE_H

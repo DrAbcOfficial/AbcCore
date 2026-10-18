@@ -6,9 +6,6 @@
 // plugin DLL. The host plugin must pump CheckAll() from a per-frame hook
 // (HUD_Frame or equivalent) for continuations to run on the main thread.
 
-#ifndef ABC_TASK_H
-#define ABC_TASK_H
-
 #include <atomic>
 #include <functional>
 #include <list>
@@ -131,5 +128,3 @@ private:
 CTaskManager *GetTaskManager();
 
 } // namespace abc
-
-#endif // ABC_TASK_H

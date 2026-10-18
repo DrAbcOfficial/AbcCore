@@ -7,9 +7,6 @@
 // vocabulary plus the chained-command pattern that ABCEnchance
 // src/core/events/command.cpp repeated by hand for every command.
 
-#ifndef ABC_EVENTS_H
-#define ABC_EVENTS_H
-
 #include <eventpp/callbacklist.h>
 
 #include <functional>
@@ -75,5 +72,3 @@ private:
 void DispatchToMainThread(std::function<void()> fn);
 
 } // namespace abc
-
-#endif // ABC_EVENTS_H

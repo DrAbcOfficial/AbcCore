@@ -6,9 +6,6 @@
 // module owns its cvar_t* members and registers them via CREATE_CVAR (or the
 // CCvarRegistrar below) in its own init path. Core never stores domain cvars.
 
-#ifndef ABC_CVARCMD_H
-#define ABC_CVARCMD_H
-
 // Platform header first (cvar_callback_t lives here) - the header must be
 // self-sufficient, consumers must not rely on including metahook.h first.
 #include <metahook.h>
@@ -69,5 +66,3 @@ private:
 };
 
 } // namespace abc
-
-#endif // ABC_CVARCMD_H

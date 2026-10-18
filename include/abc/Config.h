@@ -6,9 +6,6 @@
 // "<mod dir>/<plugin>/config.json". The concrete schema (favmodels,
 // concurrent_cmd, events_cmd, ...) is domain data and lives with AbcEssential.
 
-#ifndef ABC_CONFIG_H
-#define ABC_CONFIG_H
-
 #include <AIGCJson.hpp>
 
 #include <string>
@@ -61,5 +58,3 @@ template <typename T> bool JsonSave(T &cfg, const char *relativePath) {
 }
 
 } // namespace abc
-
-#endif // ABC_CONFIG_H

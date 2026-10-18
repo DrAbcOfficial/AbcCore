@@ -9,9 +9,6 @@
 // §4.11), so GameDir()/ModPath() resolve against the process CWD; the host
 // game must be launched with the game root as CWD (the fixed launch in 08 §3).
 
-#ifndef ABC_PATHS_H
-#define ABC_PATHS_H
-
 #include <string>
 
 namespace abc {
@@ -30,5 +27,3 @@ bool EnsureParentDir(const char *relativeFilePath);
 bool CheckAsset(const char *relativePath);
 
 } // namespace abc
-
-#endif // ABC_PATHS_H

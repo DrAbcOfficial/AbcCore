@@ -6,9 +6,6 @@
 // triangleapi.h, ...) expect unqualified vec2_t/vec3_t/mat4 and this library
 // was the only provider of them in the original plugin.
 
-#ifndef ABC_MATH_H
-#define ABC_MATH_H
-
 #include <cstddef>
 
 #undef clamp
@@ -166,5 +163,3 @@ public:
 };
 
 } // namespace abc
-
-#endif // ABC_MATH_H

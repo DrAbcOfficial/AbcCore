@@ -11,9 +11,6 @@
 // All abc:: state below is per-DLL (static lib) - never assume process-wide
 // uniqueness, both AbcEssential and AbcUi carry their own copy.
 
-#ifndef ABC_PLUGIN_H
-#define ABC_PLUGIN_H
-
 #include <metahook.h>
 
 class IFileSystem;
@@ -82,5 +79,3 @@ private:
 };
 
 } // namespace abc
-
-#endif // ABC_PLUGIN_H
