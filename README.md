@@ -35,7 +35,11 @@ cmake --build --preset win32-debug   # Release: win32-release
 `Math.h` keeps the HLSDK vocabulary. `AngleVectors`, `AngleVectorsTranspose`,
 `AngleQuaternion` and `Matrix4x4_CreateFromEntity` take engine-order
 `[pitch, yaw, roll]` degrees; `AngleMatrix` / `AngleIMatrix` keep the legacy
-GoldSrc `[roll, pitch, yaw]` mapping.
+GoldSrc `[roll, pitch, yaw]` mapping. New code should use the canonical helper
+names (`VectorMultiply`, `ColorApplyAlpha`, `PointInQuad`, `AngleMod`, `IsNaN`,
+`DegToRad`, `RadToDeg`, `Log2Floor`, `RoundHalfUp`, `Vector2Copy`, `ResetBounds`,
+`ScalePixelLength`); the legacy spellings remain as forwards. The reserved
+`_Vector*` aliases and the unused `fixed*_t` / angle constants were removed.
 
 `cmake/AbcCommon.cmake` is shared with the plugin repositories through `add_subdirectory`; `cmake/AbcGameData.cmake` provides the gamedata manifest sync/validation helpers using the bundled Python tooling in `cmake/gamedata/`.
 
