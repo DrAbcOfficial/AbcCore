@@ -107,7 +107,7 @@ public:
     return (((a) < ((((b) < (c)) ? (b) : (c)))) ? (a)
                                                 : ((((b) < (c)) ? (b) : (c))));
   }
-  static size_t GetScreenPixel(int length, double percent);
+  static std::size_t GetScreenPixel(int length, double percent);
   static void Vector2Rotate(vec2_t out, float x, float y, float rotate);
 
   static void MatrixCopy(float in[4][3], float out[4][3]);
