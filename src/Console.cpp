@@ -7,34 +7,36 @@
 
 namespace abc {
 
+namespace {
+
+void ConsoleVPrint(const char *Prefix, const char *Fmt, va_list Args) {
+  char Buffer[2048];
+  _vsnprintf_s(Buffer, sizeof(Buffer), _TRUNCATE, Fmt, Args);
+  if (gEngfuncs.Con_Printf)
+    gEngfuncs.Con_Printf("%s%s", Prefix, Buffer);
+}
+
+} // namespace
+
 void ConsolePrint(const char *fmt, ...) {
-  char buf[2048];
   va_list args;
   va_start(args, fmt);
-  _vsnprintf_s(buf, sizeof(buf), _TRUNCATE, fmt, args);
+  ConsoleVPrint("", fmt, args);
   va_end(args);
-  if (gEngfuncs.Con_Printf)
-    gEngfuncs.Con_Printf("%s", buf);
 }
 
 void ConsoleWarn(const char *fmt, ...) {
-  char buf[2048];
   va_list args;
   va_start(args, fmt);
-  _vsnprintf_s(buf, sizeof(buf), _TRUNCATE, fmt, args);
+  ConsoleVPrint("[abc] WARNING: ", fmt, args);
   va_end(args);
-  if (gEngfuncs.Con_Printf)
-    gEngfuncs.Con_Printf("[abc] WARNING: %s", buf);
 }
 
 void ConsoleError(const char *fmt, ...) {
-  char buf[2048];
   va_list args;
   va_start(args, fmt);
-  _vsnprintf_s(buf, sizeof(buf), _TRUNCATE, fmt, args);
+  ConsoleVPrint("[abc] ERROR: ", fmt, args);
   va_end(args);
-  if (gEngfuncs.Con_Printf)
-    gEngfuncs.Con_Printf("[abc] ERROR: %s", buf);
 }
 
 void ConsoleWriteline(const char *text) {
