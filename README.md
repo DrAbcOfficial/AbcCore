@@ -43,7 +43,9 @@ names (`VectorMultiply`, `ColorApplyAlpha`, `PointInQuad`, `AngleMod`, `IsNaN`,
 also use the `abc::math` namespace (`abc::math::VectorCopy`,
 `abc::math::kPi`), which forwards to the same helpers; `abc::CMathlib` remains
 the compatibility surface. The reserved `_Vector*` aliases and the unused
-`fixed*_t` / angle constants were removed.
+`fixed*_t` / angle constants were removed. `RGBToHSV` / `HSVToRGB` and
+`FloorDivMod` also expose value-returning `math::Rgb` / `math::Hsv` /
+`math::DivMod` overloads.
 
 `cmake/AbcCommon.cmake` is shared with the plugin repositories through `add_subdirectory`; `cmake/AbcGameData.cmake` provides the gamedata manifest sync/validation helpers using the bundled Python tooling in `cmake/gamedata/`.
 

@@ -588,6 +588,11 @@ inline void CMathlib::FloorDivMod(double numer, double denom, int *quotient,
   *quotient = q;
   *rem = r;
 }
+inline math::DivMod CMathlib::FloorDivMod(double numer, double denom) {
+  math::DivMod result{};
+  FloorDivMod(numer, denom, &result.quotient, &result.remainder);
+  return result;
+}
 inline int CMathlib::GreatestCommonDivisor(int i1, int i2) {
   // std::gcd also accepts the negative and zero combinations that made the
   // old recursive Quake implementation recurse forever.
@@ -918,6 +923,16 @@ inline void CMathlib::HSVToRGB(float h, float s, float v, int &r, int &g,
   r = static_cast<int>((hr + m) * 255);
   g = static_cast<int>((hg + m) * 255);
   b = static_cast<int>((hb + m) * 255);
+}
+inline math::Hsv CMathlib::RGBToHSV(math::Rgb rgb) {
+  math::Hsv hsv{};
+  RGBToHSV(rgb.r, rgb.g, rgb.b, hsv.h, hsv.s, hsv.v);
+  return hsv;
+}
+inline math::Rgb CMathlib::HSVToRGB(math::Hsv hsv) {
+  math::Rgb rgb{};
+  HSVToRGB(hsv.h, hsv.s, hsv.v, rgb.r, rgb.g, rgb.b);
+  return rgb;
 }
 
 } // namespace abc

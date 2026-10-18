@@ -36,6 +36,23 @@ using vec5_t = vec_t[5];
 
 namespace abc {
 
+namespace math {
+struct Rgb {
+  int r;
+  int g;
+  int b;
+};
+struct Hsv {
+  float h;
+  float s;
+  float v;
+};
+struct DivMod {
+  int quotient;
+  int remainder;
+};
+} // namespace math
+
 namespace mathlib {
 inline constexpr float kPi = std::numbers::pi_v<float>;
 inline constexpr double kPiDouble = std::numbers::pi;
@@ -197,6 +214,9 @@ public:
   // RGB channels in [0,255]; HSV hue degrees, saturation/value in [0,1].
   static void RGBToHSV(int r, int g, int b, float &h, float &s, float &v);
   static void HSVToRGB(float h, float s, float v, int &r, int &g, int &b);
+  static math::Hsv RGBToHSV(math::Rgb rgb);
+  static math::Rgb HSVToRGB(math::Hsv hsv);
+  static math::DivMod FloorDivMod(double numer, double denom);
 };
 
 } // namespace abc
@@ -335,6 +355,9 @@ ABC_MATH_FORWARD(void, RGBToHSV,
                  (int r, int g, int b, float &h, float &s, float &v), (r, g, b, h, s, v))
 ABC_MATH_FORWARD(void, HSVToRGB,
                  (float h, float s, float v, int &r, int &g, int &b), (h, s, v, r, g, b))
+ABC_MATH_FORWARD(Hsv, RGBToHSV, (Rgb rgb), (rgb))
+ABC_MATH_FORWARD(Rgb, HSVToRGB, (Hsv hsv), (hsv))
+ABC_MATH_FORWARD(DivMod, FloorDivMod, (double numer, double denom), (numer, denom))
 #undef ABC_MATH_FORWARD
 } // namespace math
 } // namespace abc
