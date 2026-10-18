@@ -4,6 +4,7 @@
 // import C++ methods from AbcCore.dll.
 
 #include <algorithm>
+#include <array>
 #include <bit>
 #include <cmath>
 #include <cstddef>
@@ -11,6 +12,7 @@
 #include <cstring>
 #include <limits>
 #include <numeric>
+#include <utility>
 
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -624,38 +626,23 @@ inline int CMathlib::GreatestCommonDivisor(int i1, int i2) {
   return std::gcd(i1, i2);
 }
 inline int CMathlib::InvertMatrix(const float *m, float *out) {
-#define SWAP_ROWS(a, b)                                                        \
-  {                                                                            \
-    float *_tmp = a;                                                           \
-    (a) = (b);                                                                 \
-    (b) = _tmp;                                                                \
-  }
-#define MAT(m, r, c) (m)[(c) * 4 + (r)]
+  using Row = std::array<float, 8>;
+  std::array<Row, 4> w{};
+  const auto at = [m](int r, int c) { return m[c * 4 + r]; };
+  w[0] = {at(0, 0), at(0, 1), at(0, 2), at(0, 3), 1.0f, 0.0f, 0.0f, 0.0f};
+  w[1] = {at(1, 0), at(1, 1), at(1, 2), at(1, 3), 0.0f, 1.0f, 0.0f, 0.0f};
+  w[2] = {at(2, 0), at(2, 1), at(2, 2), at(2, 3), 0.0f, 0.0f, 1.0f, 0.0f};
+  w[3] = {at(3, 0), at(3, 1), at(3, 2), at(3, 3), 0.0f, 0.0f, 0.0f, 1.0f};
 
-  float wtmp[4][8];
+  Row &r0 = w[0], &r1 = w[1], &r2 = w[2], &r3 = w[3];
   float m0, m1, m2, m3, s;
-  float *r0, *r1, *r2, *r3;
-
-  r0 = wtmp[0], r1 = wtmp[1], r2 = wtmp[2], r3 = wtmp[3];
-
-  r0[0] = MAT(m, 0, 0), r0[1] = MAT(m, 0, 1), r0[2] = MAT(m, 0, 2),
-  r0[3] = MAT(m, 0, 3), r0[4] = 1.0f, r0[5] = r0[6] = r0[7] = 0.0f,
-
-  r1[0] = MAT(m, 1, 0), r1[1] = MAT(m, 1, 1), r1[2] = MAT(m, 1, 2),
-  r1[3] = MAT(m, 1, 3), r1[5] = 1.0f, r1[4] = r1[6] = r1[7] = 0.0f,
-
-  r2[0] = MAT(m, 2, 0), r2[1] = MAT(m, 2, 1), r2[2] = MAT(m, 2, 2),
-  r2[3] = MAT(m, 2, 3), r2[6] = 1.0f, r2[4] = r2[5] = r2[7] = 0.0f,
-
-  r3[0] = MAT(m, 3, 0), r3[1] = MAT(m, 3, 1), r3[2] = MAT(m, 3, 2),
-  r3[3] = MAT(m, 3, 3), r3[7] = 1.0f, r3[4] = r3[5] = r3[6] = 0.0f;
 
   if (std::fabs(r3[0]) > std::fabs(r2[0]))
-    SWAP_ROWS(r3, r2);
+    std::swap(r3, r2);
   if (std::fabs(r2[0]) > std::fabs(r1[0]))
-    SWAP_ROWS(r2, r1);
+    std::swap(r2, r1);
   if (std::fabs(r1[0]) > std::fabs(r0[0]))
-    SWAP_ROWS(r1, r0);
+    std::swap(r1, r0);
   if (0.0f == r0[0])
     return false;
 
@@ -701,9 +688,9 @@ inline int CMathlib::InvertMatrix(const float *m, float *out) {
   }
 
   if (std::fabs(r3[1]) > std::fabs(r2[1]))
-    SWAP_ROWS(r3, r2);
+    std::swap(r3, r2);
   if (std::fabs(r2[1]) > std::fabs(r1[1]))
-    SWAP_ROWS(r2, r1);
+    std::swap(r2, r1);
   if (0.0f == r1[1])
     return false;
 
@@ -735,7 +722,7 @@ inline int CMathlib::InvertMatrix(const float *m, float *out) {
   }
 
   if (std::fabs(r3[2]) > std::fabs(r2[2]))
-    SWAP_ROWS(r3, r2);
+    std::swap(r3, r2);
   if (0.0f == r2[2])
     return false;
 
@@ -776,20 +763,29 @@ inline int CMathlib::InvertMatrix(const float *m, float *out) {
   r0[4] = s * (r0[4] - r1[4] * m0), r0[5] = s * (r0[5] - r1[5] * m0),
   r0[6] = s * (r0[6] - r1[6] * m0), r0[7] = s * (r0[7] - r1[7] * m0);
 
-  MAT(out, 0, 0) = r0[4];
-  MAT(out, 0, 1) = r0[5], MAT(out, 0, 2) = r0[6];
-  MAT(out, 0, 3) = r0[7], MAT(out, 1, 0) = r1[4];
-  MAT(out, 1, 1) = r1[5], MAT(out, 1, 2) = r1[6];
-  MAT(out, 1, 3) = r1[7], MAT(out, 2, 0) = r2[4];
-  MAT(out, 2, 1) = r2[5], MAT(out, 2, 2) = r2[6];
-  MAT(out, 2, 3) = r2[7], MAT(out, 3, 0) = r3[4];
-  MAT(out, 3, 1) = r3[5], MAT(out, 3, 2) = r3[6];
-  MAT(out, 3, 3) = r3[7];
+  const auto put = [out](int r, int c, float value) {
+    out[c * 4 + r] = value;
+  };
+  put(0, 0, r0[4]);
+  put(0, 1, r0[5]);
+  put(0, 2, r0[6]);
+  put(0, 3, r0[7]);
+  put(1, 0, r1[4]);
+  put(1, 1, r1[5]);
+  put(1, 2, r1[6]);
+  put(1, 3, r1[7]);
+  put(2, 0, r2[4]);
+  put(2, 1, r2[5]);
+  put(2, 2, r2[6]);
+  put(2, 3, r2[7]);
+  put(3, 0, r3[4]);
+  put(3, 1, r3[5]);
+  put(3, 2, r3[6]);
+  put(3, 3, r3[7]);
 
   return true;
-#undef MAT
-#undef SWAP_ROWS
 }
+
 inline void CMathlib::SinCos(float radians, float *sine, float *cosine) {
   *sine = std::sin(radians);
   *cosine = std::cos(radians);
