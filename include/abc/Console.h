@@ -12,17 +12,17 @@
 namespace abc {
 
 // Raw Con_Printf passthrough.
-void ConsolePrint(const char* fmt, ...);
+void ConsolePrint(const char *fmt, ...);
 // Plain-text warning ("[abc] WARNING: " prefix). Replaces ConsoleWarnMessage /
 // GameConsole warn prints.
-void ConsoleWarn(const char* fmt, ...);
+void ConsoleWarn(const char *fmt, ...);
 // Plain-text error ("[abc] ERROR: " prefix). Replaces GameConsole error prints.
-void ConsoleError(const char* fmt, ...);
+void ConsoleError(const char *fmt, ...);
 // Raw-string print: text is emitted as-is (no printf interpretation, no
 // newline added) - the safe entry for dynamic strings; ConsolePrint is
 // printf-style and must never take a runtime string as its format.
-void ConsoleWriteline(const char* text);
+void ConsoleWriteline(const char *text);
 
-}
+} // namespace abc
 
-#endif //ABC_CONSOLE_H
+#endif // ABC_CONSOLE_H

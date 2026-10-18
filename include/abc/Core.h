@@ -7,4 +7,4 @@ namespace abc {
 // so every plugin carries its own per-DLL instance of everything in abc::.
 const char *CoreVersion();
 
-}
+} // namespace abc

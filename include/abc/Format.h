@@ -34,64 +34,67 @@ namespace abc {
 namespace FormatDetail {
 
 inline std::string FormatValue(std::string value) {
-	return value;
+  return value;
 }
-inline std::string FormatValue(const char* value) {
-	return value ? std::string(value) : std::string();
+inline std::string FormatValue(const char *value) {
+  return value ? std::string(value) : std::string();
 }
 inline std::string FormatValue(std::string_view value) {
-	return std::string(value);
+  return std::string(value);
 }
 template <typename T>
-inline std::string FormatValue(const T& value) requires std::is_arithmetic_v<T> {
-	return std::to_string(value);
+inline std::string FormatValue(const T &value)
+  requires std::is_arithmetic_v<T>
+{
+  return std::to_string(value);
 }
 
 } // namespace FormatDetail
 
 template <typename... Args>
-inline std::string Format(std::string_view fmt, Args&&... args) {
-	// The trailing sentinel keeps the array legal for the zero-argument call;
-	// the index guard below never reaches it.
-	const std::string values[] = {FormatDetail::FormatValue(std::forward<Args>(args))..., std::string()};
-	const size_t kArgCount = sizeof...(Args);
+inline std::string Format(std::string_view fmt, Args &&...args) {
+  // The trailing sentinel keeps the array legal for the zero-argument call;
+  // the index guard below never reaches it.
+  const std::string values[] = {
+      FormatDetail::FormatValue(std::forward<Args>(args))..., std::string()};
+  const size_t kArgCount = sizeof...(Args);
 
-	std::string out;
-	out.reserve(fmt.size());
-	for (size_t i = 0; i < fmt.size(); i++) {
-		const char c = fmt[i];
-		if (c != '{') {
-			out += c;
-			continue;
-		}
-		if (i + 1 < fmt.size() && fmt[i + 1] == '{') {
-			out += '{';
-			i++;
-			continue;
-		}
-		size_t j = i + 1;
-		size_t index = 0;
-		bool digits = false;
-		bool overflow = false;
-		while (j < fmt.size() && fmt[j] >= '0' && fmt[j] <= '9') {
-			const size_t digit = static_cast<size_t>(fmt[j] - '0');
-			if (index > ((std::numeric_limits<size_t>::max)() - digit) / 10)
-				overflow = true;
-			else if (!overflow)
-				index = index * 10 + digit;
-			digits = true;
-			j++;
-		}
-		if (digits && !overflow && j < fmt.size() && fmt[j] == '}' && index < kArgCount) {
-			out += values[index];
-			i = j;
-		}
-		else {
-			// Malformed or out-of-range placeholder: verbatim (debuggable).
-			out += '{';
-		}
-	}
-	return out;
+  std::string out;
+  out.reserve(fmt.size());
+  for (size_t i = 0; i < fmt.size(); i++) {
+    const char c = fmt[i];
+    if (c != '{') {
+      out += c;
+      continue;
+    }
+    if (i + 1 < fmt.size() && fmt[i + 1] == '{') {
+      out += '{';
+      i++;
+      continue;
+    }
+    size_t j = i + 1;
+    size_t index = 0;
+    bool digits = false;
+    bool overflow = false;
+    while (j < fmt.size() && fmt[j] >= '0' && fmt[j] <= '9') {
+      const size_t digit = static_cast<size_t>(fmt[j] - '0');
+      if (index > ((std::numeric_limits<size_t>::max)() - digit) / 10)
+        overflow = true;
+      else if (!overflow)
+        index = index * 10 + digit;
+      digits = true;
+      j++;
+    }
+    if (digits && !overflow && j < fmt.size() && fmt[j] == '}' &&
+        index < kArgCount) {
+      out += values[index];
+      i = j;
+    } else {
+      // Malformed or out-of-range placeholder: verbatim (debuggable).
+      out += '{';
+    }
+  }
+  return out;
 }
 
-}
+} // namespace abc

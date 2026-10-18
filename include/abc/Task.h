@@ -21,108 +21,115 @@ namespace abc {
 
 class ITaskItem {
 public:
-	virtual ~ITaskItem() {
-	}
-	virtual ITaskItem* Start() = 0;
-	virtual bool IsReady() = 0;
-	virtual std::function<void()> GetCaller() = 0;
+  virtual ~ITaskItem() {}
+  virtual ITaskItem *Start() = 0;
+  virtual bool IsReady() = 0;
+  virtual std::function<void()> GetCaller() = 0;
+
 protected:
-	std::thread m_pThread;
-	std::atomic_bool m_bReady = false;
+  std::thread m_pThread;
+  std::atomic_bool m_bReady = false;
 };
 
-template <typename Result>
-class CTaskItem : public ITaskItem {
+template <typename Result> class CTaskItem : public ITaskItem {
 public:
-	CTaskItem(std::function<Result()>& futrue) {
-		auto& refB = m_bReady;
-		auto& refV = m_pValue;
-		auto& error = m_pError;
-		m_pThread = std::thread(
-			[&refB, &refV, &error, ft = std::move(futrue)]() mutable {
-				try { refV = ft(); }
-					catch (...) { error = std::current_exception(); }
-				refB = true;
-			}
-		);
-	}
-	virtual ~CTaskItem() {
-		if (m_pThread.joinable())
-			m_pThread.join();
-	}
-	//continue in main thread
-	//if you wanna capture some ref with recursion, PLEASE NOT TRUST lambda capture
-	//First of function arg must same as Result
-	template <typename F, typename... Args>
-	CTaskItem* ContinueWith(F&& func, Args&&... args) {
-		m_pContinue = std::bind(std::forward<F>(func), std::placeholders::_1, std::forward<Args>(args)...);
-		return this;
-	}
-	//start task
-	// No-op: the thread already starts in the constructor. Kept so the
-	// fluent chain Add(...)->Start()->ContinueWith(...) still reads naturally.
-	virtual CTaskItem* Start() override {
-		return this;
-	}
-	//is ready
-	virtual bool IsReady() override {
-		return m_bReady;
-	}
-	//get caller
-	virtual std::function<void()> GetCaller() override {
-		if (m_pError) {
-				auto error = m_pError;
-				return [error]() { std::rethrow_exception(error); };
-			}
-			// A task started without ContinueWith (fire-and-forget) yields a
-		// no-op, so CheckAll never std::invoke()s an empty std::function.
-		if (!m_pContinue)
-			return []() {};
-		return std::bind(m_pContinue, m_pValue);
-	}
+  CTaskItem(std::function<Result()> &futrue) {
+    auto &refB = m_bReady;
+    auto &refV = m_pValue;
+    auto &error = m_pError;
+    m_pThread =
+        std::thread([&refB, &refV, &error, ft = std::move(futrue)]() mutable {
+          try {
+            refV = ft();
+          } catch (...) {
+            error = std::current_exception();
+          }
+          refB = true;
+        });
+  }
+  virtual ~CTaskItem() {
+    if (m_pThread.joinable())
+      m_pThread.join();
+  }
+  // continue in main thread
+  // if you wanna capture some ref with recursion, PLEASE NOT TRUST lambda
+  // capture First of function arg must same as Result
+  template <typename F, typename... Args>
+  CTaskItem *ContinueWith(F &&func, Args &&...args) {
+    m_pContinue = std::bind(std::forward<F>(func), std::placeholders::_1,
+                            std::forward<Args>(args)...);
+    return this;
+  }
+  // start task
+  //  No-op: the thread already starts in the constructor. Kept so the
+  //  fluent chain Add(...)->Start()->ContinueWith(...) still reads naturally.
+  virtual CTaskItem *Start() override {
+    return this;
+  }
+  // is ready
+  virtual bool IsReady() override {
+    return m_bReady;
+  }
+  // get caller
+  virtual std::function<void()> GetCaller() override {
+    if (m_pError) {
+      auto error = m_pError;
+      return [error]() { std::rethrow_exception(error); };
+    }
+    // A task started without ContinueWith (fire-and-forget) yields a
+    // no-op, so CheckAll never std::invoke()s an empty std::function.
+    if (!m_pContinue)
+      return []() {};
+    return std::bind(m_pContinue, m_pValue);
+  }
+
 private:
-	Result m_pValue{};
-	std::exception_ptr m_pError;
-	std::function<void(Result&)> m_pContinue;
+  Result m_pValue{};
+  std::exception_ptr m_pError;
+  std::function<void(Result &)> m_pContinue;
 };
 
 class CTaskManager {
 public:
-	// Main-thread only: Add/ContinueWith/Has/CheckAll/Shutdown. Complete the
-	// fluent chain before pumping CheckAll. Worker threads use Post only.
-	// Workers must finish cooperatively before DLL unload: Shutdown joins;
-	// it cannot safely bound arbitrary user work or detach DLL code.
-	~CTaskManager() { Shutdown(); }
-	bool Post(std::function<void()> fn);
-	std::exception_ptr TakeException();
-	//add a new async task
-	template <typename Result, typename F, typename... Args>
-	CTaskItem<Result>* Add(F&& func, Args&&... args) {
-		if (!m_bAccepting)
-			return nullptr;
-		std::function<Result()> a = std::bind(std::forward<F>(func), std::forward<Args>(args)...);
-		CTaskItem<Result>* item = new CTaskItem<Result>(a);
-		m_aryPending.push_back(item);
-		return item;
-	}
-	//has this task? (checks pending and in-flight)
-	bool Has(ITaskItem* check);
-	//check per frame
-	void CheckAll();
-	void Shutdown();
+  // Main-thread only: Add/ContinueWith/Has/CheckAll/Shutdown. Complete the
+  // fluent chain before pumping CheckAll. Worker threads use Post only.
+  // Workers must finish cooperatively before DLL unload: Shutdown joins;
+  // it cannot safely bound arbitrary user work or detach DLL code.
+  ~CTaskManager() {
+    Shutdown();
+  }
+  bool Post(std::function<void()> fn);
+  std::exception_ptr TakeException();
+  // add a new async task
+  template <typename Result, typename F, typename... Args>
+  CTaskItem<Result> *Add(F &&func, Args &&...args) {
+    if (!m_bAccepting)
+      return nullptr;
+    std::function<Result()> a =
+        std::bind(std::forward<F>(func), std::forward<Args>(args)...);
+    CTaskItem<Result> *item = new CTaskItem<Result>(a);
+    m_aryPending.push_back(item);
+    return item;
+  }
+  // has this task? (checks pending and in-flight)
+  bool Has(ITaskItem *check);
+  // check per frame
+  void CheckAll();
+  void Shutdown();
+
 private:
-	std::mutex m_Mutex;
-	std::list<std::function<void()>> m_Callbacks;
-	std::atomic_bool m_bAccepting = true;
-	std::exception_ptr m_LastException; // main-thread error channel
-	void Invoke(std::function<void()> fn);
-	std::list<ITaskItem*> m_aryList;
-	std::list<ITaskItem*> m_aryPending;
+  std::mutex m_Mutex;
+  std::list<std::function<void()>> m_Callbacks;
+  std::atomic_bool m_bAccepting = true;
+  std::exception_ptr m_LastException; // main-thread error channel
+  void Invoke(std::function<void()> fn);
+  std::list<ITaskItem *> m_aryList;
+  std::list<ITaskItem *> m_aryPending;
 };
 
 // per-DLL instance (static lib)
-CTaskManager* GetTaskManager();
+CTaskManager *GetTaskManager();
 
-}
+} // namespace abc
 
-#endif //ABC_TASK_H
+#endif // ABC_TASK_H

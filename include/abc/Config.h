@@ -23,42 +23,42 @@ namespace abc {
 // Relative paths only; call after GameDir is ready.
 // Raw JSON text under "<mod dir>/<relativePath>".
 enum class JsonLoadStatus { Success, Missing, Invalid, IoError };
-JsonLoadStatus ReadJsonFileStatus(const char* relativePath, std::string& jsonOut);
-bool ReadJsonFile(const char* relativePath, std::string& jsonOut);
-bool WriteJsonFile(const char* relativePath, const std::string& json);
+JsonLoadStatus ReadJsonFileStatus(const char *relativePath,
+                                  std::string &jsonOut);
+bool ReadJsonFile(const char *relativePath, std::string &jsonOut);
+bool WriteJsonFile(const char *relativePath, const std::string &json);
 
 // Typed helpers for AIGC_JSON_HELPER structs. Missing file is not an error
 // (first run); parse failures warn through abc::ConsoleWarn and return false.
 // JsonSave takes a non-const reference because AIGCJson's serializer API
 // (ObjectToJson) is non-const.
 template <typename T>
-JsonLoadStatus JsonLoadWithStatus(T& cfg, const char* relativePath) {
-	std::string json;
-	const auto status = ReadJsonFileStatus(relativePath, json);
-	if (status != JsonLoadStatus::Success) return status;
-	T candidate = cfg;
-	if (!aigc::JsonHelper::JsonToObject(candidate, json)) {
-		ConsoleWarn("Couldn't parse config file %s\n", relativePath);
-		return JsonLoadStatus::Invalid;
-	}
-	cfg = std::move(candidate);
-	return JsonLoadStatus::Success;
+JsonLoadStatus JsonLoadWithStatus(T &cfg, const char *relativePath) {
+  std::string json;
+  const auto status = ReadJsonFileStatus(relativePath, json);
+  if (status != JsonLoadStatus::Success)
+    return status;
+  T candidate = cfg;
+  if (!aigc::JsonHelper::JsonToObject(candidate, json)) {
+    ConsoleWarn("Couldn't parse config file %s\n", relativePath);
+    return JsonLoadStatus::Invalid;
+  }
+  cfg = std::move(candidate);
+  return JsonLoadStatus::Success;
 }
-template <typename T>
-bool JsonLoad(T& cfg, const char* relativePath) {
-	return JsonLoadWithStatus(cfg, relativePath) == JsonLoadStatus::Success;
-}
-
-template <typename T>
-bool JsonSave(T& cfg, const char* relativePath) {
-	std::string json;
-	if (!aigc::JsonHelper::ObjectToJson(cfg, json)) {
-		ConsoleWarn("Couldn't serialize config for %s\n", relativePath);
-		return false;
-	}
-	return WriteJsonFile(relativePath, json);
+template <typename T> bool JsonLoad(T &cfg, const char *relativePath) {
+  return JsonLoadWithStatus(cfg, relativePath) == JsonLoadStatus::Success;
 }
 
+template <typename T> bool JsonSave(T &cfg, const char *relativePath) {
+  std::string json;
+  if (!aigc::JsonHelper::ObjectToJson(cfg, json)) {
+    ConsoleWarn("Couldn't serialize config for %s\n", relativePath);
+    return false;
+  }
+  return WriteJsonFile(relativePath, json);
 }
 
-#endif //ABC_CONFIG_H
+} // namespace abc
+
+#endif // ABC_CONFIG_H

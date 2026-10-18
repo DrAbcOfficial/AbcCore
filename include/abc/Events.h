@@ -21,8 +21,7 @@
 namespace abc {
 
 // Shared vocabulary so plugins don't include eventpp headers directly.
-template <typename Sig>
-using CallbackList = eventpp::CallbackList<Sig>;
+template <typename Sig> using CallbackList = eventpp::CallbackList<Sig>;
 
 // Hook an existing console command and let subscribers vote on it:
 // - subscribers run in registration order on the engine command thread;
@@ -34,34 +33,38 @@ using CallbackList = eventpp::CallbackList<Sig>;
 // time, never dynamically.
 class CChainedCommand {
 public:
-	using Callback = CallbackList<bool()>;
+  using Callback = CallbackList<bool()>;
 
-	static constexpr size_t kMaxInstances = 32;
+  static constexpr size_t kMaxInstances = 32;
 
-	explicit CChainedCommand(const char* cmdName);
-	~CChainedCommand();
+  explicit CChainedCommand(const char *cmdName);
+  ~CChainedCommand();
 
-	// Instances register their own address in the slot table at hook time;
-	// copying/moving would leave that slot pointing at the wrong object.
-	CChainedCommand(const CChainedCommand&) = delete;
-	CChainedCommand& operator=(const CChainedCommand&) = delete;
-	CChainedCommand(CChainedCommand&&) = delete;
-	CChainedCommand& operator=(CChainedCommand&&) = delete;
+  // Instances register their own address in the slot table at hook time;
+  // copying/moving would leave that slot pointing at the wrong object.
+  CChainedCommand(const CChainedCommand &) = delete;
+  CChainedCommand &operator=(const CChainedCommand &) = delete;
+  CChainedCommand(CChainedCommand &&) = delete;
+  CChainedCommand &operator=(CChainedCommand &&) = delete;
 
-	Callback& Event() { return m_event; }
+  Callback &Event() {
+    return m_event;
+  }
 
-	const char* Name() const { return m_szName; }
+  const char *Name() const {
+    return m_szName;
+  }
 
-	void RunChain();
+  void RunChain();
 
-	// Internal: entry point used by the thunk table in Events.cpp.
-	static void DispatchSlot(size_t slot);
+  // Internal: entry point used by the thunk table in Events.cpp.
+  static void DispatchSlot(size_t slot);
 
 private:
-	char m_szName[64];
-	int m_iSlot = -1;
-	xcommand_t m_pfnOriginal = nullptr;
-	Callback m_event;
+  char m_szName[64];
+  int m_iSlot = -1;
+  xcommand_t m_pfnOriginal = nullptr;
+  Callback m_event;
 };
 
 // Run fn on the main thread shortly after this call: it is queued through the
@@ -71,6 +74,6 @@ private:
 // when the caller needs an acceptance result.
 void DispatchToMainThread(std::function<void()> fn);
 
-}
+} // namespace abc
 
-#endif //ABC_EVENTS_H
+#endif // ABC_EVENTS_H
