@@ -299,13 +299,13 @@ inline void CMathlib::VectorAngles(const vec3_t forward, vec3_t angles) {
 inline float CMathlib::FVectorLength(vec3_t v) {
   float length = 0;
   for (int i = 0; i < 3; i++)
-    length += static_cast<float>(pow(v[i], 2));
+    length += v[i] * v[i];
   return sqrt(length);
 }
 inline double CMathlib::VectorLength(vec3_t v) {
   double length = 0;
   for (int i = 0; i < 3; i++)
-    length += pow(v[i], 2);
+    length += static_cast<double>(v[i]) * v[i];
   return sqrt(length);
 }
 
@@ -376,7 +376,7 @@ inline vec_t CMathlib::VectorNormalize(vec3_t v) {
 
   length = 0;
   for (i = 0; i < 3; i++)
-    length += pow(v[i], 2);
+    length += static_cast<double>(v[i]) * v[i];
 
   length = sqrt(length);
 
