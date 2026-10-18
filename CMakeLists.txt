@@ -21,6 +21,7 @@ set(ABC_CORE_SOURCES
     src/Paths.cpp
     src/Platform.cpp
     src/SteamId.cpp
+    src/detail/SteamIdCompat.cpp
 )
 if(ABC_WITH_HTTP)
     message(FATAL_ERROR "ABC_WITH_HTTP is blocked: no pinned matching UtilHTTPClient headers/runtime or verified callback lifetime contract. Resolve CORE-02/03/04 before enabling; an arbitrary ABC_HTTPCLIENT_INCLUDE_DIR is not sufficient.")

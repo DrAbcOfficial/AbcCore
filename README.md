@@ -29,7 +29,7 @@ cmake --build --preset win32-debug   # Release: win32-release
 | `Task.h` | Background worker tasks + main-thread continuations (the host calls `abc::GetTaskManager().CheckAll()` every frame) |
 | `Paths.h` | `GameDir` / `ModPath` / `EnsureDir` / `EnsureParentDir` / `CheckAsset` |
 | `Platform.h` | Win32 odds and ends (registry, icon extraction) |
-| `SteamId.h` | SteamID parsing/rendering (header-only, no steam_api dependency) |
+| `SteamId.h` | SteamID parsing/rendering (no steam_api dependency; the pinned SDK's out-of-line CSteamID methods live in `src/detail/SteamIdCompat.cpp`) |
 
 `cmake/AbcCommon.cmake` is shared with the plugin repositories through `add_subdirectory`; `cmake/AbcGameData.cmake` provides the gamedata manifest sync/validation helpers using the bundled Python tooling in `cmake/gamedata/`.
 

@@ -1,12 +1,12 @@
 #pragma once
 
 // abc::SteamId - SteamID parsing/rendering.
-// The out-of-line CSteamID methods ported from ABCEnchance
-// src/utility/steamid.cpp are compiled in src/SteamId.cpp against the
-// header-only SteamSDK submodule (thirdparty/SteamSDK, pinned to the
-// MetaHookSv aggregate). No steam_api.dll dependency: only string/number
-// parsing lives here; avatar/friends data goes through AbcUi's
-// SteamAPIBridge (decision D-07).
+// Parsing lives in src/SteamId.cpp against the header-only SteamSDK
+// submodule (thirdparty/SteamSDK, pinned to the MetaHookSv aggregate). The
+// pinned SDK declares CSteamID's out-of-line methods but does not define
+// them; src/detail/SteamIdCompat.cpp provides those compatibility symbols
+// explicitly. No steam_api.dll dependency: only string/number parsing lives
+// here; avatar/friends data goes through AbcUi's SteamAPIBridge (D-07).
 
 #ifndef ABC_STEAMID_H
 #define ABC_STEAMID_H
