@@ -26,7 +26,7 @@ void CHttpClient::Init() {
     return;
   }
   g_pUtilHTTPClient = (decltype(g_pUtilHTTPClient))factory(
-      UTIL_HTTPCLIENT_LIBCURL_INTERFACE_VERSION, NULL);
+      UTIL_HTTPCLIENT_LIBCURL_INTERFACE_VERSION, nullptr);
   if (!g_pUtilHTTPClient) {
     SysError("Could not get UtilHTTPClient from UtilHTTPClient_libcurl.dll");
     return;

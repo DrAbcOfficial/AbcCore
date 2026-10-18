@@ -32,7 +32,7 @@ const char *Win32GetAttributesAsString(DWORD dwAttributes) {
 
 std::string Win32GetFileDescriptionByExtension(const char *extension) {
   HKEY hKey;
-  if (RegOpenKeyExA(HKEY_CLASSES_ROOT, NULL, 0, KEY_READ, &hKey) ==
+  if (RegOpenKeyExA(HKEY_CLASSES_ROOT, nullptr, 0, KEY_READ, &hKey) ==
       ERROR_SUCCESS) {
     std::string subKey = Win32GetDefaultValueFromRegistry(hKey, extension);
     std::string description = Win32GetDefaultValueFromRegistry(hKey, subKey);
@@ -46,11 +46,11 @@ std::string Win32GetStringValueFromRegistry(HKEY hKey,
                                             const std::string &valueName) {
   std::string result;
   DWORD size = 0;
-  if (RegGetValueA(hKey, subKey.c_str(), valueName.c_str(), RRF_RT_REG_SZ, NULL,
-                   NULL, &size) == ERROR_SUCCESS) {
+  if (RegGetValueA(hKey, subKey.c_str(), valueName.c_str(), RRF_RT_REG_SZ, nullptr,
+                   nullptr, &size) == ERROR_SUCCESS) {
     char *buffer = new char[size];
     if (RegGetValueA(hKey, subKey.c_str(), valueName.c_str(), RRF_RT_REG_SZ,
-                     NULL, buffer, &size) == ERROR_SUCCESS)
+                     nullptr, buffer, &size) == ERROR_SUCCESS)
       result = std::string(buffer, size - 1);
     delete[] buffer;
   }
@@ -62,14 +62,14 @@ std::string Win32GetDefaultValueFromRegistry(HKEY hKey,
 }
 HICON Win32GetFileIconByExtension(const std::string &extension) {
   HKEY hKey;
-  if (RegOpenKeyExA(HKEY_CLASSES_ROOT, NULL, 0, KEY_READ, &hKey) ==
+  if (RegOpenKeyExA(HKEY_CLASSES_ROOT, nullptr, 0, KEY_READ, &hKey) ==
       ERROR_SUCCESS) {
     std::string subKey = Win32GetDefaultValueFromRegistry(hKey, extension);
     std::string iconPath =
         Win32GetDefaultValueFromRegistry(hKey, subKey + "\\DefaultIcon");
     RegCloseKey(hKey);
     if (iconPath.size() == 0)
-      return NULL;
+      return nullptr;
     // DefaultIcon value is "path[,index]" - a missing index means icon 0.
     // Parsed without exceptions: registry strings are untrusted input.
     std::string path = iconPath;
@@ -86,16 +86,16 @@ HICON Win32GetFileIconByExtension(const std::string &extension) {
     const DWORD expanded =
         ExpandEnvironmentStringsA(path.c_str(), expandedPath, MAX_PATH);
     if (!expanded || expanded > MAX_PATH)
-      return NULL;
+      return nullptr;
     wchar_t widePath[MAX_PATH];
     if (!MultiByteToWideChar(CP_ACP, 0, expandedPath, -1, widePath, MAX_PATH))
-      return NULL;
-    HICON smallIcon = NULL;
-    if (ExtractIconExW(widePath, index, NULL, &smallIcon, 1) != 1)
-      return NULL;
+      return nullptr;
+    HICON smallIcon = nullptr;
+    if (ExtractIconExW(widePath, index, nullptr, &smallIcon, 1) != 1)
+      return nullptr;
     return smallIcon;
   }
-  return NULL;
+  return nullptr;
 }
 BITMAP Win32GetBitmapInfo(HICON hIcon) {
   BITMAP bmp = {};
@@ -121,7 +121,7 @@ std::vector<unsigned char> Win32ConvertHICONToRGBA(HICON hIcon, size_t &ww,
     return {};
   // Allocate before acquiring handles so bad_alloc cannot leak GDI resources.
   std::vector<unsigned char> rgba(static_cast<size_t>(width) * height * 4);
-  HDC dc = CreateCompatibleDC(NULL);
+  HDC dc = CreateCompatibleDC(nullptr);
   if (!dc)
     return {};
   BITMAPINFO bmi{};
@@ -132,7 +132,7 @@ std::vector<unsigned char> Win32ConvertHICONToRGBA(HICON hIcon, size_t &ww,
   bmi.bmiHeader.biBitCount = 32;
   unsigned char *bits = nullptr;
   HBITMAP bitmap =
-      CreateDIBSection(dc, &bmi, DIB_RGB_COLORS, (void **)&bits, NULL, 0);
+      CreateDIBSection(dc, &bmi, DIB_RGB_COLORS, (void **)&bits, nullptr, 0);
   if (!bitmap || !bits) {
     if (bitmap)
       DeleteObject(bitmap);
@@ -147,7 +147,7 @@ std::vector<unsigned char> Win32ConvertHICONToRGBA(HICON hIcon, size_t &ww,
   }
   std::memset(bits, 0, rgba.size());
   const bool ok =
-      DrawIconEx(dc, 0, 0, hIcon, width, height, 0, NULL, DI_NORMAL) != FALSE;
+      DrawIconEx(dc, 0, 0, hIcon, width, height, 0, nullptr, DI_NORMAL) != FALSE;
   if (ok)
     for (size_t i = 0; i < rgba.size(); i += 4) {
       rgba[i] = bits[i + 2];
@@ -178,7 +178,7 @@ void Sys_GetRegKeyValueUnderRoot(HKEY rootKey, const char *pszSubKey,
   if (nReturnLength > (int)sizeof(szBuff))
     nReturnLength = (int)sizeof(szBuff); // szBuff below can't hold more
   lResult = RegCreateKeyExA(rootKey, pszSubKey, 0, (LPSTR) "String",
-                            REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL,
+                            REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr,
                             &hKey, &dwDisposition);
   if (lResult != ERROR_SUCCESS)
     return;

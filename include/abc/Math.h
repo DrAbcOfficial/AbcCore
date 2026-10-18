@@ -13,21 +13,21 @@
 
 #undef clamp
 
-typedef float vec_t;
-typedef vec_t vec2_t[2];
-typedef vec_t vec3_t[3];
-typedef vec_t vec4_t[4];
-typedef vec_t vec5_t[5];
+using vec_t = float;
+using vec2_t = vec_t[2];
+using vec3_t = vec_t[3];
+using vec4_t = vec_t[4];
+using vec5_t = vec_t[5];
 
-typedef float mat3x4[3][4];
-typedef float mat4[4][4];
-typedef float vec4[4];
-typedef int ivec4[4];
-typedef unsigned int uvec4[4];
+using mat3x4 = float[3][4];
+using mat4 = float[4][4];
+using vec4 = float[4];
+using ivec4 = int[4];
+using uvec4 = unsigned int[4];
 
-typedef int fixed4_t;
-typedef int fixed8_t;
-typedef int fixed16_t;
+using fixed4_t = int;
+using fixed8_t = int;
+using fixed16_t = int;
 
 namespace abc {
 
