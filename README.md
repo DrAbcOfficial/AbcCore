@@ -20,6 +20,7 @@ cmake --build --preset win32-debug   # Release: win32-release
 |---|---|
 | `Plugin.h` | `CAbcPluginBase` (IPluginsV4 skeleton, engine-side checks and info); the four metahook.h globals (one per DLL) |
 | `Format.h` / `NetMsg.h` | Type-safe positional-placeholder formatting (not an RML/command escaper); strict NUL/boundary message reads |
+| `Parse.h` | Strict, locale-independent `ParseNumber` / `ParseInt` / `ParseFloat` (whole-view consumption, `std::optional` result, no exceptions) |
 | `Console.h` | `ConsolePrint/Warn/Error/Writeline` (through `gEngfuncs.Con_Printf`) |
 | `CvarCmd.h` | `CREATE_CVAR`, `ABC_HOOK_COMMAND`, `ServerCmd`, `abc::SigScan`, `CCvarRegistrar` |
 | `Events.h` | eventpp vocabulary, `CChainedCommand` (hook a command, let subscribers vote, chain back to the original), `DispatchToMainThread` |
