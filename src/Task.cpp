@@ -10,12 +10,12 @@ CTaskManager *GetTaskManager() {
   return &s_TaskManager;
 }
 bool CTaskManager::Has(ITaskItem *check) {
-  for (auto iter = m_aryList.begin(); iter != m_aryList.end(); iter++) {
-    if ((*iter) == check)
+  for (const auto &item : m_aryList) {
+    if (item.get() == check)
       return true;
   }
-  for (auto iter = m_aryPending.begin(); iter != m_aryPending.end(); iter++) {
-    if ((*iter) == check)
+  for (const auto &item : m_aryPending) {
+    if (item.get() == check)
       return true;
   }
   return false;
@@ -48,16 +48,8 @@ void CTaskManager::Shutdown() {
     m_bAccepting = false;
     discarded.swap(m_Callbacks);
   }
-  for (auto iter = m_aryList.begin(); iter != m_aryList.end(); iter++) {
-    auto item = *iter;
-    delete item;
-  }
+  // unique_ptr owns every item: clear() joins the worker in each destructor.
   m_aryList.clear();
-
-  for (auto iter = m_aryPending.begin(); iter != m_aryPending.end(); iter++) {
-    auto item = *iter;
-    delete item;
-  }
   m_aryPending.clear();
 }
 void CTaskManager::CheckAll() {
@@ -73,7 +65,7 @@ void CTaskManager::CheckAll() {
   }
 
   for (auto iter = m_aryList.begin(); iter != m_aryList.end();) {
-    auto item = *iter;
+    const auto &item = *iter;
     if (item->IsReady()) {
       // GetCaller() binds the result by value, so the returned callable
       // is self-contained; pull it out before deleting the item (the
@@ -86,7 +78,6 @@ void CTaskManager::CheckAll() {
         if (!m_LastException)
           m_LastException = std::current_exception();
       }
-      delete item;
       iter = m_aryList.erase(iter);
       Invoke(std::move(caller));
       if (!m_bAccepting)
@@ -95,7 +86,7 @@ void CTaskManager::CheckAll() {
       iter++;
   }
   // add pending
-  if (m_aryPending.size() > 0)
+  if (!m_aryPending.empty())
     m_aryList.splice(m_aryList.end(), m_aryPending);
 }
 

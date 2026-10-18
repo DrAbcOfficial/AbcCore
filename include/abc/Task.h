@@ -123,8 +123,8 @@ private:
   std::atomic_bool m_bAccepting = true;
   std::exception_ptr m_LastException; // main-thread error channel
   void Invoke(std::function<void()> fn);
-  std::list<ITaskItem *> m_aryList;
-  std::list<ITaskItem *> m_aryPending;
+  std::list<std::unique_ptr<ITaskItem>> m_aryList;
+  std::list<std::unique_ptr<ITaskItem>> m_aryPending;
 };
 
 // per-DLL instance (static lib)
