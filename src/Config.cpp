@@ -2,6 +2,7 @@
 #include <abc/Paths.h>
 #include <abc/Plugin.h>
 #include <abc/detail/ConfigFile.h>
+#include <abc/detail/PathUtf8.h>
 
 namespace abc {
 JsonLoadStatus ReadJsonFileStatus(const char *relativePath,
@@ -39,7 +40,7 @@ bool WriteJsonFile(const char *relativePath, const std::string &json) {
   // data.
   if (!relativePath || !*GameDir())
     return false;
-  const auto relative = std::filesystem::u8path(relativePath);
+  const auto relative = detail::PathFromUtf8(relativePath);
   if (relative.empty() || relative.has_root_path())
     return false;
   for (const auto &part : relative)

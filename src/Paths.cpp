@@ -1,4 +1,5 @@
 #include <abc/Paths.h>
+#include <abc/detail/PathUtf8.h>
 #include <abc/Console.h>
 #include <abc/Plugin.h>
 
@@ -29,7 +30,7 @@ std::string ModPath(const char *relativePath) {
   if (!relativePath || !*GameDir())
     return {};
   std::filesystem::path p =
-      std::filesystem::path(GameDir()) / std::filesystem::u8path(relativePath);
+      std::filesystem::path(GameDir()) / detail::PathFromUtf8(relativePath);
   return p.string();
 }
 
@@ -38,7 +39,7 @@ bool EnsureDir(const char *relativeDir) {
     return false;
   std::error_code ec;
   std::filesystem::create_directories(std::filesystem::path(GameDir()) /
-                                          std::filesystem::u8path(relativeDir),
+                                          detail::PathFromUtf8(relativeDir),
                                       ec);
   if (ec) {
     ConsoleWarn("Couldn't create directory %s (%s)\n", relativeDir,
@@ -52,7 +53,7 @@ bool EnsureParentDir(const char *relativeFilePath) {
   if (!relativeFilePath || !*GameDir())
     return false;
   std::filesystem::path p = std::filesystem::path(GameDir()) /
-                            std::filesystem::u8path(relativeFilePath);
+                            detail::PathFromUtf8(relativeFilePath);
   std::filesystem::path parent = p.parent_path();
   if (parent.empty())
     return true;
