@@ -53,5 +53,7 @@ if(ABC_WITH_HTTP)
 endif()
 
 target_compile_features(abc_core PUBLIC cxx_std_20)
+# First-party warnings: /W3 hides unused/shadow/sign-conversion issues.
+target_compile_options(abc_core PRIVATE /W4)
 
 target_link_libraries(abc_core PUBLIC user32 gdi32 shell32 advapi32 winmm)

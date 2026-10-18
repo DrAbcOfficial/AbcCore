@@ -103,7 +103,7 @@ void CChainedCommand::DispatchSlot(size_t slot) {
 void CChainedCommand::RunChain() {
   bool ret = true;
   m_event.forEach(
-      [&](const Callback::Handle &handle, const Callback::Callback &callback) {
+      [&](const Callback::Handle &, const Callback::Callback &callback) {
         ret &= callback();
       });
   if (ret && m_pfnOriginal)
