@@ -488,18 +488,13 @@ inline void CMathlib::VectorTransform(const vec3_t in1, float in2[3][4],
   out[2] = DotProduct(in1, in2[2]) + in2[2][3];
 }
 inline void CMathlib::AngleQuaternion(const vec3_t angles, vec4_t quaternion) {
-  float angle;
-  float sr, sp, sy, cr, cp, cy;
-
-  angle = angles[2] * 0.5f;
-  sy = sin(angle);
-  cy = cos(angle);
-  angle = angles[1] * 0.5f;
-  sp = sin(angle);
-  cp = cos(angle);
-  angle = angles[0] * 0.5f;
-  sr = sin(angle);
-  cr = cos(angle);
+  const float half = 0.5f * mathlib::kDegToRad;
+  const float sr = sin(angles[2] * half);
+  const float cr = cos(angles[2] * half);
+  const float sp = sin(angles[0] * half);
+  const float cp = cos(angles[0] * half);
+  const float sy = sin(angles[1] * half);
+  const float cy = cos(angles[1] * half);
 
   quaternion[0] = sr * cp * cy - cr * sp * sy;
   quaternion[1] = cr * sp * cy + sr * cp * sy;

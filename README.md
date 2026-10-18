@@ -32,6 +32,11 @@ cmake --build --preset win32-debug   # Release: win32-release
 | `Platform.h` | Win32 odds and ends (registry, icon extraction) |
 | `SteamId.h` | SteamID parsing/rendering (no steam_api dependency; the pinned SDK's out-of-line CSteamID methods live in `src/detail/SteamIdCompat.cpp`) |
 
+`Math.h` keeps the HLSDK vocabulary. `AngleVectors`, `AngleVectorsTranspose`,
+`AngleQuaternion` and `Matrix4x4_CreateFromEntity` take engine-order
+`[pitch, yaw, roll]` degrees; `AngleMatrix` / `AngleIMatrix` keep the legacy
+GoldSrc `[roll, pitch, yaw]` mapping.
+
 `cmake/AbcCommon.cmake` is shared with the plugin repositories through `add_subdirectory`; `cmake/AbcGameData.cmake` provides the gamedata manifest sync/validation helpers using the bundled Python tooling in `cmake/gamedata/`.
 
 AbcCore is renderer-free. The `IMetaRenderer` bridge and the renderer constant tables live in AbcUi, which owns the direct Renderer dependency.

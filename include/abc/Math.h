@@ -132,6 +132,7 @@ public:
   static vec_t Length(const vec3_t v);
   static void AddPointToBounds(vec3_t v, vec3_t mins, vec3_t maxs);
   static void AngleIMatrix(const vec3_t angles, float matrix[3][4]);
+  // Angles are pitch/yaw/roll degrees, matching AngleVectors.
   static void AngleQuaternion(const vec3_t angles, vec4_t quaternion);
   static void QuaternionMatrix(const vec4_t quaternion, float (*matrix)[4]);
   // Does not modify p or q.
