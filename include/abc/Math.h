@@ -97,17 +97,22 @@ public:
   static void ColorApplyAlpha(int &r, int &g, int &b, int a);
   // Legacy misspelling.
   static void ColorCalcuAlpha(int &r, int &g, int &b, int a);
+  // contentLength * clamp(fraction, 0, 1), truncated.
   static std::size_t ScalePixelLength(int contentLength, double fraction);
   // Legacy name.
   static std::size_t GetScreenPixel(int length, double percent);
+  // Rotates (x, y) by radians.
   static void Vector2Rotate(vec2_t out, float x, float y, float radians);
 
   static void MatrixCopy(float in[4][3], float out[4][3]);
   static void VectorMA(const vec3_t veca, float scale, const vec3_t vecb,
                        vec3_t vecc);
 
+  // Element-wise absolute comparison against float epsilon (not HLSDK 0.001).
   static int VectorCompare(const vec3_t v1, const vec3_t v2);
+  // Single-precision length.
   static float FVectorLength(const vec3_t v);
+  // Double-precision length.
   static double VectorLength(const vec3_t v);
   static void CrossProduct(const vec3_t v1, const vec3_t v2, vec3_t cross);
   static float VectorNormalize(vec3_t v);
@@ -117,6 +122,7 @@ public:
   static int Log2Floor(int val);
   // Legacy Quake-prefixed alias.
   static int Q_log2(int val);
+  // Initializes mins to 99999 and maxs to -99999.
   static void ResetBounds(vec3_t mins, vec3_t maxs);
   // Legacy name; resets to sentinel bounds, it does not zero them.
   static void ClearBounds(vec3_t mins, vec3_t maxs);
@@ -170,6 +176,7 @@ public:
 
   static void VectorAngles(const vec3_t forward, vec3_t angles);
 
+  // 4x4 inverse; returns 0 for a singular matrix.
   static int InvertMatrix(const float *m, float *out);
 
   // Affine inputs only; output may alias either input.
@@ -189,6 +196,7 @@ public:
   // Legacy spelling.
   static float anglemod(float a);
 
+  // Affine inputs only; out must not alias either input.
   static void ConcatTransforms(float in1[3][4], float in2[3][4],
                                float out[3][4]);
   // RGB channels in [0,255]; HSV hue degrees, saturation/value in [0,1].
