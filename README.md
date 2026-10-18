@@ -25,7 +25,7 @@ cmake --build --preset win32-debug   # Release: win32-release
 | `Console.h` | `ConsolePrint/Warn/Error/Writeline` (through `gEngfuncs.Con_Printf`) |
 | `CvarCmd.h` | `CREATE_CVAR`, `ADD_COMMAND`, `ServerCmd` / `EngineClientCmd`, `abc::SigScan`, `CCvarRegistrar` |
 | `Events.h` | eventpp vocabulary, `CChainedCommand` (hook a command, let subscribers vote, chain back to the original), `DispatchToMainThread` |
-| `Math.h` | `vec2_t` / `vec3_t` / `mat4` typedefs + `abc::CMathlib` |
+| `Math.h` | `vec2_t` / `vec3_t` / `mat4` typedefs + `abc::CMathlib`; `k`-prefixed constants (`kPi`, `kDegToRad`, ...) with deprecated legacy spellings |
 | `Config.h` | `JsonLoad` / `JsonSave` (annotated struct <-> `<mod>/config.json`; reads through IFileSystem, writes through Win32 atomic replace keeping a `.bak`) |
 | `Task.h` | Background worker tasks + main-thread continuations (the host calls `abc::GetTaskManager().CheckAll()` every frame) |
 | `Paths.h` | `GameDir` / `ModPath` / `EnsureDir` / `EnsureParentDir` / `CheckAsset` |

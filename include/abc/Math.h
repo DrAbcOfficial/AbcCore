@@ -25,6 +25,7 @@
 #endif
 
 #include <cstddef>
+#include <numbers>
 
 using vec_t = float;
 using vec2_t = vec_t[2];
@@ -45,8 +46,19 @@ using fixed16_t = int;
 namespace abc {
 
 namespace mathlib {
-const float F_PI = 3.14159265358979323846f;
-const double Q_PI = 3.14159265358979323846;
+inline constexpr float kPi = std::numbers::pi_v<float>;
+inline constexpr double kPiDouble = std::numbers::pi;
+inline constexpr float kDegToRad = std::numbers::pi_v<float> / 180.0f;
+inline constexpr float kRadToDeg = 180.0f / std::numbers::pi_v<float>;
+inline constexpr float kMetersPerInch = 0.0254f;
+
+// Legacy spellings retained for source compatibility; new code should use the
+// k-prefixed constants above.
+[[deprecated("use kPi")]] inline constexpr float F_PI = kPi;
+[[deprecated("use kPiDouble")]] inline constexpr double Q_PI = kPiDouble;
+[[deprecated("use kMetersPerInch")]] inline constexpr float METERS_PER_INCH =
+    kMetersPerInch;
+
 const double DOUBLE_PI = 2 * 3.14159265358979323846;
 const float COLINEAR_EPSILON = 0.001f;
 const int MAX_PLAYER_NAME_LENGTH = 128;
@@ -57,7 +69,6 @@ const double SQRT_TWO = 1.414213562373095048801;
 const double SQRT_THREE = 1.732050807568877293527;
 const float FLAT_ANGLE = 180.0f;
 const vec3_t vecZero = {0, 0, 0};
-const float METERS_PER_INCH = 0.0254f;
 const int nanmask = 255 << 23;
 } // namespace mathlib
 

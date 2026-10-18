@@ -33,10 +33,10 @@ inline bool CMathlib::Q_IS_NAN(float x) {
   return (bits & 0x7F800000u) == 0x7F800000u && (bits & 0x007FFFFFu) != 0;
 }
 inline float CMathlib::Q_DEG2RAD(float a) {
-  return (a * mathlib::F_PI) / 180.0f;
+  return (a * mathlib::kPi) / 180.0f;
 }
 inline float CMathlib::Q_RAD2DEG(float r) {
-  return (r * 180.0f) / mathlib::F_PI;
+  return (r * 180.0f) / mathlib::kPi;
 }
 inline float CMathlib::RANDOM_FLOAT(float low, float high) {
   return gEngfuncs.pfnRandomFloat(low, high);
@@ -45,10 +45,10 @@ inline int CMathlib::RANDOM_LONG(int low, int high) {
   return gEngfuncs.pfnRandomLong(low, high);
 }
 inline float CMathlib::METER2INCH(float x) {
-  return (float)(x * (1.0f / mathlib::METERS_PER_INCH));
+  return (float)(x * (1.0f / mathlib::kMetersPerInch));
 }
 inline float CMathlib::INCH2METER(float x) {
-  return (float)(x * (mathlib::METERS_PER_INCH / 1.0f));
+  return (float)(x * (mathlib::kMetersPerInch / 1.0f));
 }
 inline void CMathlib::VectorSubtract(vec3_t a, vec3_t b, vec3_t c) {
   (c)[0] = (a)[0] - (b)[0];
@@ -218,7 +218,7 @@ inline void CMathlib::AngleVectors(const vec3_t angles, vec3_t forward,
   float angle;
   vec2_t cs[3];
   for (int i = 0; i < 3; i++) {
-    angle = angles[i] * (mathlib::F_PI / 180.0f);
+    angle = angles[i] * mathlib::kDegToRad;
     cs[i][0] = sin(angle);
     cs[i][1] = cos(angle);
   }
@@ -245,7 +245,7 @@ inline void CMathlib::AngleVectorsTranspose(const vec3_t angles,
   float angle;
   vec2_t cs[3];
   for (int i = 0; i < 3; i++) {
-    angle = angles[i] * (mathlib::F_PI / 180.0f);
+    angle = angles[i] * mathlib::kDegToRad;
     cs[i][0] = sin(angle);
     cs[i][1] = cos(angle);
   }
@@ -279,14 +279,14 @@ inline void CMathlib::VectorAngles(const vec3_t forward, vec3_t angles) {
       pitch = 270;
   } else {
     yaw = static_cast<float>(
-        (atan2((double)forward[1], (double)forward[0]) * 180 / mathlib::Q_PI));
+        (atan2((double)forward[1], (double)forward[0]) * 180 / mathlib::kPiDouble));
 
     if (yaw < 0)
       yaw += 360;
 
     float tmp = sqrt(forward[0] * forward[0] + forward[1] * forward[1]);
     pitch = static_cast<float>(atan2((double)forward[2], (double)tmp) * 180 /
-                               mathlib::Q_PI);
+                               mathlib::kPiDouble);
 
     if (pitch < 0)
       pitch += 360;
@@ -426,13 +426,13 @@ inline void CMathlib::AngleMatrix(const vec3_t angles, float (*matrix)[4]) {
   float angle;
   float sr, sp, sy, cr, cp, cy;
 
-  angle = angles[2] * (mathlib::F_PI * 2 / 360);
+  angle = angles[2] * mathlib::kDegToRad;
   sy = sin(angle);
   cy = cos(angle);
-  angle = angles[1] * (mathlib::F_PI * 2 / 360);
+  angle = angles[1] * mathlib::kDegToRad;
   sp = sin(angle);
   cp = cos(angle);
-  angle = angles[0] * (mathlib::F_PI * 2 / 360);
+  angle = angles[0] * mathlib::kDegToRad;
   sr = sin(angle);
   cr = cos(angle);
 
@@ -453,13 +453,13 @@ inline void CMathlib::AngleIMatrix(const vec3_t angles, float matrix[3][4]) {
   float angle;
   float sr, sp, sy, cr, cp, cy;
 
-  angle = angles[2] * (mathlib::F_PI * 2 / 360);
+  angle = angles[2] * mathlib::kDegToRad;
   sy = sin(angle);
   cy = cos(angle);
-  angle = angles[1] * (mathlib::F_PI * 2 / 360);
+  angle = angles[1] * mathlib::kDegToRad;
   sp = sin(angle);
   cp = cos(angle);
-  angle = angles[0] * (mathlib::F_PI * 2 / 360);
+  angle = angles[0] * mathlib::kDegToRad;
   sr = sin(angle);
   cr = cos(angle);
 
@@ -624,8 +624,8 @@ inline void CMathlib::QuaternionSlerp(const vec4_t p, const vec4_t q, float t,
     qt[1] = p[0];
     qt[2] = -p[3];
     qt[3] = p[2];
-    sclp = sin((1.0f - t) * 0.5f * mathlib::F_PI);
-    sclq = sin(t * 0.5f * mathlib::F_PI);
+    sclp = sin((1.0f - t) * 0.5f * mathlib::kPi);
+    sclq = sin(t * 0.5f * mathlib::kPi);
 
     for (i = 0; i < 3; i++)
       qt[i] = sclp * p[i] + sclq * qt[i];
@@ -838,11 +838,11 @@ inline void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4],
   out[3][3] = 1;
   float angle, sr, sp, sy, cr, cp, cy;
   if (angles[Q_ROLL]) {
-    angle = angles[Q_YAW] * (mathlib::F_PI * 2 / 360.0f);
+    angle = angles[Q_YAW] * mathlib::kDegToRad;
     SinCos(angle, &sy, &cy);
-    angle = angles[Q_PITCH] * (mathlib::F_PI * 2 / 360.0f);
+    angle = angles[Q_PITCH] * mathlib::kDegToRad;
     SinCos(angle, &sp, &cp);
-    angle = angles[Q_ROLL] * (mathlib::F_PI * 2 / 360.0f);
+    angle = angles[Q_ROLL] * mathlib::kDegToRad;
     SinCos(angle, &sr, &cr);
 
     out[0][0] = (cp * cy) * scale;
@@ -858,9 +858,9 @@ inline void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4],
     out[2][2] = (cr * cp) * scale;
     out[2][3] = origin[2];
   } else if (angles[Q_PITCH]) {
-    angle = angles[Q_YAW] * (mathlib::F_PI * 2 / 360.0f);
+    angle = angles[Q_YAW] * mathlib::kDegToRad;
     SinCos(angle, &sy, &cy);
-    angle = angles[Q_PITCH] * (mathlib::F_PI * 2 / 360.0f);
+    angle = angles[Q_PITCH] * mathlib::kDegToRad;
     SinCos(angle, &sp, &cp);
 
     out[0][0] = (cp * cy) * scale;
@@ -876,7 +876,7 @@ inline void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4],
     out[2][2] = (cp)*scale;
     out[2][3] = origin[2];
   } else if (angles[Q_YAW]) {
-    angle = angles[Q_YAW] * (mathlib::F_PI * 2 / 360.0f);
+    angle = angles[Q_YAW] * mathlib::kDegToRad;
     SinCos(angle, &sy, &cy);
 
     out[0][0] = (cy)*scale;
