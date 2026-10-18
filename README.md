@@ -25,7 +25,7 @@ cmake --build --preset win32-debug   # Release: win32-release
 | `Console.h` | `ConsolePrint/Warn/Error/Writeline` (through `gEngfuncs.Con_Printf`) |
 | `CvarCmd.h` | `CREATE_CVAR`, `ADD_COMMAND`, `ServerCmd` / `EngineClientCmd`, `abc::SigScan`, `CCvarRegistrar` |
 | `Events.h` | eventpp vocabulary, `CChainedCommand` (hook a command, let subscribers vote, chain back to the original), `DispatchToMainThread` |
-| `Math.h` | `vec2_t` / `vec3_t` / `mat4` typedefs + `abc::CMathlib`, with an `abc::math` forwarding namespace; `k`-prefixed constants (`kPi`, `kDegToRad`, ...) with deprecated legacy spellings; `AngleVectorsTranspose` returns the transposed basis |
+| `Math.h` | `vec_t` / `vec2_t` / `vec3_t` / `vec4_t` typedefs + `abc::CMathlib`, with an `abc::math` forwarding namespace; `k`-prefixed constants (`kPi`, `kDegToRad`, ...) with deprecated legacy spellings; `AngleVectorsTranspose` returns the transposed basis |
 | `Config.h` | `JsonLoad` / `JsonSave` (annotated struct <-> `<mod>/config.json`; reads through IFileSystem, writes through Win32 atomic replace keeping a `.bak`) |
 | `Task.h` | Background worker tasks + main-thread continuations (the host calls `abc::GetTaskManager().CheckAll()` every frame) |
 | `Paths.h` | `GameDir` / `ModPath` / `EnsureDir` / `EnsureParentDir` / `CheckAsset` |
@@ -46,7 +46,7 @@ the compatibility surface. The reserved `_Vector*` aliases and the unused
 
 `cmake/AbcCommon.cmake` is shared with the plugin repositories through `add_subdirectory`; `cmake/AbcGameData.cmake` provides the gamedata manifest sync/validation helpers using the bundled Python tooling in `cmake/gamedata/`.
 
-AbcCore is renderer-free. The `IMetaRenderer` bridge and the renderer constant tables live in AbcUi, which owns the direct Renderer dependency.
+AbcCore is renderer-free. The `IMetaRenderer` bridge and the renderer constant tables live in AbcUi, which owns the direct Renderer dependency. Renderer-side `mat3x4` / `mat4` / `vec4` / `ivec4` / `uvec4` aliases live in AbcUi's `src/render/RenderCommon.h` shim, not in `abc/Math.h`.
 
 ## Dynamic interface
 

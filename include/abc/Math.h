@@ -3,8 +3,9 @@
 // abc::Math - vector/matrix math library.
 // Ported from ABCEnchance src/core/library/mymathlib.h/.cpp (GBK -> UTF-8).
 // Vector typedefs stay at global scope: engine/HLSDK headers (com_model.h,
-// triangleapi.h, ...) expect unqualified vec2_t/vec3_t/mat4 and this library
-// was the only provider of them in the original plugin.
+// triangleapi.h, ...) expect unqualified vec2_t/vec3_t/vec4_t and this library
+// was the only provider of them in the original plugin. Renderer-side
+// mat3x4/mat4/vec4/ivec4/uvec4 aliases live in AbcUi's RenderCommon.h.
 
 // Engine/SDK headers expose these as macros; hide them while this header
 // includes the standard library, then restore the caller's definitions.
@@ -32,12 +33,6 @@ using vec2_t = vec_t[2];
 using vec3_t = vec_t[3];
 using vec4_t = vec_t[4];
 using vec5_t = vec_t[5];
-
-using mat3x4 = float[3][4];
-using mat4 = float[4][4];
-using vec4 = float[4];
-using ivec4 = int[4];
-using uvec4 = unsigned int[4];
 
 namespace abc {
 
