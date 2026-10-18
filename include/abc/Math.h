@@ -113,11 +113,6 @@ public:
   static void VectorMA(const vec3_t veca, float scale, const vec3_t vecb,
                        vec3_t vecc);
 
-  static vec_t _DotProduct(vec3_t v1, vec3_t v2);
-  static void _VectorSubtract(vec3_t veca, vec3_t vecb, vec3_t out);
-  static void _VectorAdd(vec3_t veca, vec3_t vecb, vec3_t out);
-  static void _VectorCopy(vec3_t in, vec3_t out);
-
   static int VectorCompare(const vec3_t v1, const vec3_t v2);
   static float FVectorLength(vec3_t v);
   static double VectorLength(vec3_t v);
@@ -133,7 +128,6 @@ public:
                                   const vec3_t normal);
   static void PerpendicularVector(vec3_t dst, const vec3_t src);
   static vec_t Q_rint(vec_t in);
-  static void _VectorScale(vec3_t v, vec_t scale, vec3_t out);
   static vec_t Length(const vec3_t v);
   static void AddPointToBounds(vec3_t v, vec3_t mins, vec3_t maxs);
   static void AngleIMatrix(const vec3_t angles, float matrix[3][4]);
