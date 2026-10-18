@@ -28,18 +28,21 @@
 #endif
 
 namespace abc {
-inline bool CMathlib::Q_IS_NAN(float x) {
+inline bool CMathlib::IsNaN(float x) {
   // Strict NaN: exponent all ones AND a non-zero mantissa. The old
   // pointer-pun also reported +/-Inf as NaN and violated strict aliasing.
   const auto bits = std::bit_cast<std::uint32_t>(x);
   return (bits & 0x7F800000u) == 0x7F800000u && (bits & 0x007FFFFFu) != 0;
 }
-inline float CMathlib::Q_DEG2RAD(float a) {
-  return (a * mathlib::kPi) / 180.0f;
+inline bool CMathlib::Q_IS_NAN(float x) { return IsNaN(x); }
+inline float CMathlib::DegToRad(float degrees) {
+  return (degrees * mathlib::kPi) / 180.0f;
 }
-inline float CMathlib::Q_RAD2DEG(float r) {
-  return (r * 180.0f) / mathlib::kPi;
+inline float CMathlib::Q_DEG2RAD(float a) { return DegToRad(a); }
+inline float CMathlib::RadToDeg(float radians) {
+  return (radians * 180.0f) / mathlib::kPi;
 }
+inline float CMathlib::Q_RAD2DEG(float r) { return RadToDeg(r); }
 inline float CMathlib::RANDOM_FLOAT(float low, float high) {
   return gEngfuncs.pfnRandomFloat(low, high);
 }
@@ -81,10 +84,11 @@ inline void CMathlib::VectorCopy(const vec3_t src, vec3_t dst) {
   (dst)[2] = (src)[2];
 }
 inline void CMathlib::VectorReverse(vec3_t a) { VectorInverse(a); }
-inline void CMathlib::Q_Vector2Copy(vec2_t a, vec2_t b) {
-  (b)[0] = (a)[0];
-  (b)[1] = (a)[1];
+inline void CMathlib::Vector2Copy(vec2_t src, vec2_t dst) {
+  (dst)[0] = (src)[0];
+  (dst)[1] = (src)[1];
 }
+inline void CMathlib::Q_Vector2Copy(vec2_t a, vec2_t b) { Vector2Copy(a, b); }
 inline void CMathlib::VectorClear(vec3_t a) {
   (a)[0] = (a)[1] = (a)[2] = 0.0;
 }
@@ -198,10 +202,10 @@ inline void CMathlib::RotatePointAroundVector(vec3_t dst, const vec3_t dir,
   std::memset(zrot, 0, sizeof(zrot));
   zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
 
-  zrot[0][0] = std::cos(CMathlib::Q_DEG2RAD(degrees));
-  zrot[0][1] = std::sin(CMathlib::Q_DEG2RAD(degrees));
-  zrot[1][0] = -std::sin(CMathlib::Q_DEG2RAD(degrees));
-  zrot[1][1] = std::cos(CMathlib::Q_DEG2RAD(degrees));
+  zrot[0][0] = std::cos(CMathlib::DegToRad(degrees));
+  zrot[0][1] = std::sin(CMathlib::DegToRad(degrees));
+  zrot[1][0] = -std::sin(CMathlib::DegToRad(degrees));
+  zrot[1][1] = std::cos(CMathlib::DegToRad(degrees));
 
   CMathlib::R_ConcatRotations(m, zrot, tmpmat);
   CMathlib::R_ConcatRotations(tmpmat, im, rot);
@@ -321,9 +325,10 @@ inline int CMathlib::VectorCompare(const vec3_t v1, const vec3_t v2) {
   }
   return 1;
 }
-inline vec_t CMathlib::Q_rint(vec_t in) {
+inline vec_t CMathlib::RoundHalfUp(vec_t in) {
   return static_cast<float>(std::floor(in + 0.5f));
 }
+inline vec_t CMathlib::Q_rint(vec_t in) { return RoundHalfUp(in); }
 inline void CMathlib::VectorMA(const vec3_t va, float scale, const vec3_t vb,
                                vec3_t vc) {
   vc[0] = va[0] + scale * vb[0];
@@ -376,11 +381,12 @@ inline void CMathlib::VectorScale(const vec3_t in, vec_t scale, vec3_t out) {
   out[1] = in[1] * scale;
   out[2] = in[2] * scale;
 }
-inline int CMathlib::Q_log2(int val) {
+inline int CMathlib::Log2Floor(int val) {
   if (val <= 0)
     return 0;
   return static_cast<int>(std::bit_width(static_cast<unsigned>(val))) - 1;
 }
+inline int CMathlib::Q_log2(int val) { return Log2Floor(val); }
 inline void CMathlib::ClearBounds(vec3_t mins, vec3_t maxs) {
   mins[0] = mins[1] = mins[2] = 99999;
   maxs[0] = maxs[1] = maxs[2] = -99999;
@@ -787,12 +793,12 @@ inline void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4],
   out[3][0] = out[3][1] = out[3][2] = 0;
   out[3][3] = 1;
   float angle, sr, sp, sy, cr, cp, cy;
-  if (angles[Q_ROLL]) {
-    angle = angles[Q_YAW] * mathlib::kDegToRad;
+  if (angles[kRoll]) {
+    angle = angles[kYaw] * mathlib::kDegToRad;
     SinCos(angle, &sy, &cy);
-    angle = angles[Q_PITCH] * mathlib::kDegToRad;
+    angle = angles[kPitch] * mathlib::kDegToRad;
     SinCos(angle, &sp, &cp);
-    angle = angles[Q_ROLL] * mathlib::kDegToRad;
+    angle = angles[kRoll] * mathlib::kDegToRad;
     SinCos(angle, &sr, &cr);
 
     out[0][0] = (cp * cy) * scale;
@@ -807,10 +813,10 @@ inline void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4],
     out[2][1] = (sr * cp) * scale;
     out[2][2] = (cr * cp) * scale;
     out[2][3] = origin[2];
-  } else if (angles[Q_PITCH]) {
-    angle = angles[Q_YAW] * mathlib::kDegToRad;
+  } else if (angles[kPitch]) {
+    angle = angles[kYaw] * mathlib::kDegToRad;
     SinCos(angle, &sy, &cy);
-    angle = angles[Q_PITCH] * mathlib::kDegToRad;
+    angle = angles[kPitch] * mathlib::kDegToRad;
     SinCos(angle, &sp, &cp);
 
     out[0][0] = (cp * cy) * scale;
@@ -825,8 +831,8 @@ inline void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4],
     out[2][1] = 0.0f;
     out[2][2] = (cp)*scale;
     out[2][3] = origin[2];
-  } else if (angles[Q_YAW]) {
-    angle = angles[Q_YAW] * mathlib::kDegToRad;
+  } else if (angles[kYaw]) {
+    angle = angles[kYaw] * mathlib::kDegToRad;
     SinCos(angle, &sy, &cy);
 
     out[0][0] = (cy)*scale;

@@ -58,6 +58,11 @@ inline constexpr float kMetersPerInch = 0.0254f;
 
 class CMathlib {
 public:
+  static bool IsNaN(float x);
+  static float DegToRad(float degrees);
+  static float RadToDeg(float radians);
+
+  // Legacy Quake-prefixed aliases.
   static bool Q_IS_NAN(float x);
   static float Q_DEG2RAD(float a);
   static float Q_RAD2DEG(float r);
@@ -70,6 +75,9 @@ public:
     Q_YAW,       // left / right
     Q_ROLL       // fall over
   };
+  static constexpr int kPitch = Q_PITCH;
+  static constexpr int kYaw = Q_YAW;
+  static constexpr int kRoll = Q_ROLL;
   static float METER2INCH(float x);
   static float INCH2METER(float x);
   static void VectorSubtract(vec3_t a, vec3_t b, vec3_t c);
@@ -81,6 +89,8 @@ public:
   static void VectorCopy(const vec3_t src, vec3_t dst);
   // Legacy alias for VectorInverse.
   static void VectorReverse(vec3_t a);
+  static void Vector2Copy(vec2_t src, vec2_t dst);
+  // Legacy spelling.
   static void Q_Vector2Copy(vec2_t a, vec2_t b);
   static void VectorClear(vec3_t a);
   static float DotProduct(const vec3_t x, const vec3_t y);
@@ -102,12 +112,16 @@ public:
   static void VectorInverse(vec3_t v);
   static void VectorScale(const vec3_t in, vec_t scale, vec3_t out);
   // floor(log2(val)); non-positive input returns 0.
+  static int Log2Floor(int val);
+  // Legacy Quake-prefixed alias.
   static int Q_log2(int val);
   static void ClearBounds(vec3_t mins, vec3_t maxs);
   // Any finite normal; zero normal leaves p unchanged. Aliasing is supported.
   static void ProjectPointOnPlane(vec3_t dst, const vec3_t p,
                                   const vec3_t normal);
   static void PerpendicularVector(vec3_t dst, const vec3_t src);
+  static vec_t RoundHalfUp(vec_t in);
+  // Legacy Quake-prefixed alias.
   static vec_t Q_rint(vec_t in);
   static vec_t Length(const vec3_t v);
   static void AddPointToBounds(vec3_t v, vec3_t mins, vec3_t maxs);
