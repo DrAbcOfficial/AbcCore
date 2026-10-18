@@ -872,10 +872,10 @@ inline void CMathlib::RGBToHSV(int r, int g, int b, float &h, float &s,
 }
 inline void CMathlib::HSVToRGB(float h, float s, float v, int &r, int &g,
                                int &b) {
-  // 0<=h<360
-  // 0<=s<=1
-  // 0<=v<=1
-  h = static_cast<float>(std::fmod(h, 360));
+  // h is normalized to [0, 360), s/v to [0, 1].
+  h = std::fmod(h, 360.0f);
+  if (h < 0.0f)
+    h += 360.0f;
   s = std::clamp(s, 0.0f, 1.0f);
   v = std::clamp(v, 0.0f, 1.0f);
   float section = h / 60;
