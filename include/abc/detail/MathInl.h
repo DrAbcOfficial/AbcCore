@@ -15,10 +15,14 @@
 #endif
 #include <metahook.h>
 #ifdef min
+#pragma push_macro("min")
 #undef min
+#define ABC_MATH_INL_RESTORE_MIN
 #endif
 #ifdef max
+#pragma push_macro("max")
 #undef max
+#define ABC_MATH_INL_RESTORE_MAX
 #endif
 
 namespace abc {
@@ -1020,3 +1024,12 @@ inline void CMathlib::HSVToRGB(float h, float s, float v, int &r, int &g,
 }
 
 } // namespace abc
+
+#ifdef ABC_MATH_INL_RESTORE_MAX
+#pragma pop_macro("max")
+#undef ABC_MATH_INL_RESTORE_MAX
+#endif
+#ifdef ABC_MATH_INL_RESTORE_MIN
+#pragma pop_macro("min")
+#undef ABC_MATH_INL_RESTORE_MIN
+#endif

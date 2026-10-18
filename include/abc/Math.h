@@ -6,9 +6,25 @@
 // triangleapi.h, ...) expect unqualified vec2_t/vec3_t/mat4 and this library
 // was the only provider of them in the original plugin.
 
-#include <cstddef>
-
+// Engine/SDK headers expose these as macros; hide them while this header
+// includes the standard library, then restore the caller's definitions.
+#ifdef clamp
+#pragma push_macro("clamp")
 #undef clamp
+#define ABC_MATH_RESTORE_CLAMP
+#endif
+#ifdef min
+#pragma push_macro("min")
+#undef min
+#define ABC_MATH_RESTORE_MIN
+#endif
+#ifdef max
+#pragma push_macro("max")
+#undef max
+#define ABC_MATH_RESTORE_MAX
+#endif
+
+#include <cstddef>
 
 using vec_t = float;
 using vec2_t = vec_t[2];
@@ -168,3 +184,16 @@ public:
 } // namespace abc
 
 #include "detail/MathInl.h"
+
+#ifdef ABC_MATH_RESTORE_MAX
+#pragma pop_macro("max")
+#undef ABC_MATH_RESTORE_MAX
+#endif
+#ifdef ABC_MATH_RESTORE_MIN
+#pragma pop_macro("min")
+#undef ABC_MATH_RESTORE_MIN
+#endif
+#ifdef ABC_MATH_RESTORE_CLAMP
+#pragma pop_macro("clamp")
+#undef ABC_MATH_RESTORE_CLAMP
+#endif
