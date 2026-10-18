@@ -14,21 +14,6 @@
 #include <numeric>
 #include <utility>
 
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <metahook.h>
-#ifdef min
-#pragma push_macro("min")
-#undef min
-#define ABC_MATH_INL_RESTORE_MIN
-#endif
-#ifdef max
-#pragma push_macro("max")
-#undef max
-#define ABC_MATH_INL_RESTORE_MAX
-#endif
-
 namespace abc {
 inline bool CMathlib::IsNaN(float x) {
   // Strict NaN: exponent all ones AND a non-zero mantissa. The old
@@ -45,12 +30,6 @@ inline float CMathlib::RadToDeg(float radians) {
   return (radians * 180.0f) / mathlib::kPi;
 }
 inline float CMathlib::Q_RAD2DEG(float r) { return RadToDeg(r); }
-inline float CMathlib::RANDOM_FLOAT(float low, float high) {
-  return gEngfuncs.pfnRandomFloat(low, high);
-}
-inline int CMathlib::RANDOM_LONG(int low, int high) {
-  return gEngfuncs.pfnRandomLong(low, high);
-}
 inline float CMathlib::METER2INCH(float x) {
   return (float)(x * (1.0f / mathlib::kMetersPerInch));
 }
@@ -942,12 +921,3 @@ inline void CMathlib::HSVToRGB(float h, float s, float v, int &r, int &g,
 }
 
 } // namespace abc
-
-#ifdef ABC_MATH_INL_RESTORE_MAX
-#pragma pop_macro("max")
-#undef ABC_MATH_INL_RESTORE_MAX
-#endif
-#ifdef ABC_MATH_INL_RESTORE_MIN
-#pragma pop_macro("min")
-#undef ABC_MATH_INL_RESTORE_MIN
-#endif
