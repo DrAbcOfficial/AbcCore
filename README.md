@@ -25,8 +25,8 @@ cmake --build --preset win32-debug   # Release: win32-release
 | `Console.h` | `ConsolePrint/Warn/Error/Writeline` (through `gEngfuncs.Con_Printf`) |
 | `CvarCmd.h` | `CREATE_CVAR`, `ADD_COMMAND`, `ServerCmd` / `EngineClientCmd`, `abc::SigScan`, `CCvarRegistrar` |
 | `Events.h` | eventpp vocabulary, `CChainedCommand` (hook a command, let subscribers vote, chain back to the original), `DispatchToMainThread` |
-| `Math.h` | `vec_t` / `vec2_t` / `vec3_t` / `vec4_t` typedefs + `abc::CMathlib`, with an `abc::math` forwarding namespace; `k`-prefixed constants (`kPi`, `kDegToRad`, ...) with deprecated legacy spellings; `AngleVectorsTranspose` returns the transposed basis |
-| `EngineRandom.h` | `CMathlib::RANDOM_FLOAT` / `RANDOM_LONG` (and `abc::math` aliases) backed by `gEngfuncs`; keeps `metahook.h` out of `Math.h` |
+| `Math.h` | `vec_t` / `vec2_t` / `vec3_t` / `vec4_t` typedefs + `abc::math` free functions, `Rgb` / `Hsv` / `DivMod` and `k`-prefixed constants; `AngleVectorsTranspose` returns the transposed basis |
+| `EngineRandom.h` | `abc::math::RANDOM_FLOAT` / `RANDOM_LONG` backed by `gEngfuncs`; keeps `metahook.h` out of `Math.h` |
 | `Config.h` | `JsonLoad` / `JsonSave` (annotated struct <-> `<mod>/config.json`; reads through IFileSystem, writes through Win32 atomic replace keeping a `.bak`) |
 | `Task.h` | Background worker tasks + main-thread continuations (the host calls `abc::GetTaskManager().CheckAll()` every frame) |
 | `Paths.h` | `GameDir` / `ModPath` / `EnsureDir` / `EnsureParentDir` / `CheckAsset` |
@@ -36,16 +36,11 @@ cmake --build --preset win32-debug   # Release: win32-release
 `Math.h` keeps the HLSDK vocabulary. `AngleVectors`, `AngleVectorsTranspose`,
 `AngleQuaternion` and `Matrix4x4_CreateFromEntity` take engine-order
 `[pitch, yaw, roll]` degrees; `AngleMatrix` / `AngleIMatrix` keep the legacy
-GoldSrc `[roll, pitch, yaw]` mapping. New code should use the canonical helper
-names (`VectorMultiply`, `ColorApplyAlpha`, `PointInQuad`, `AngleMod`, `IsNaN`,
-`DegToRad`, `RadToDeg`, `Log2Floor`, `RoundHalfUp`, `Vector2Copy`, `ResetBounds`,
-`ScalePixelLength`); the legacy spellings remain as forwards. New code may
-also use the `abc::math` namespace (`abc::math::VectorCopy`,
-`abc::math::kPi`), which forwards to the same helpers; `abc::CMathlib` remains
-the compatibility surface. The reserved `_Vector*` aliases and the unused
-`fixed*_t` / angle constants were removed. `RGBToHSV` / `HSVToRGB` and
-`FloorDivMod` also expose value-returning `math::Rgb` / `math::Hsv` /
-`math::DivMod` overloads.
+GoldSrc `[roll, pitch, yaw]` mapping. The API is the `abc::math` namespace
+(`abc::math::VectorCopy`, `abc::math::kPi`), with value-returning
+`Rgb` / `Hsv` / `DivMod` overloads for `RGBToHSV` / `HSVToRGB` / `FloorDivMod`.
+The old `CMathlib` class, `mathlib` constants, `Q_*` and misspelled forwards,
+reserved `_Vector*` aliases and unused constants were removed.
 
 `cmake/AbcCommon.cmake` is shared with the plugin repositories through `add_subdirectory`; `cmake/AbcGameData.cmake` provides the gamedata manifest sync/validation helpers using the bundled Python tooling in `cmake/gamedata/`.
 

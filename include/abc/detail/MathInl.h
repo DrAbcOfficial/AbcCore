@@ -1,7 +1,7 @@
 #pragma once
 
-// Inline CMathlib implementation. Kept header-only so classic plugins do not
-// import C++ methods from AbcCore.dll.
+// Inline abc::math implementation. Kept header-only so classic plugins do
+// not import C++ methods from AbcCore.dll.
 
 #include <algorithm>
 #include <array>
@@ -14,91 +14,78 @@
 #include <utility>
 
 namespace abc {
-inline bool CMathlib::IsNaN(float x) {
+namespace math {
+inline bool IsNaN(float x) {
   // Strict NaN: exponent all ones AND a non-zero mantissa. The old
   // pointer-pun also reported +/-Inf as NaN and violated strict aliasing.
   const auto bits = std::bit_cast<std::uint32_t>(x);
   return (bits & 0x7F800000u) == 0x7F800000u && (bits & 0x007FFFFFu) != 0;
 }
-inline bool CMathlib::Q_IS_NAN(float x) { return IsNaN(x); }
-inline float CMathlib::DegToRad(float degrees) {
-  return (degrees * mathlib::kPi) / 180.0f;
+inline float DegToRad(float degrees) {
+  return (degrees * kPi) / 180.0f;
 }
-inline float CMathlib::Q_DEG2RAD(float a) { return DegToRad(a); }
-inline float CMathlib::RadToDeg(float radians) {
-  return (radians * 180.0f) / mathlib::kPi;
+inline float RadToDeg(float radians) {
+  return (radians * 180.0f) / kPi;
 }
-inline float CMathlib::Q_RAD2DEG(float r) { return RadToDeg(r); }
-inline float CMathlib::METER2INCH(float x) {
-  return (float)(x * (1.0f / mathlib::kMetersPerInch));
+inline float METER2INCH(float x) {
+  return (float)(x * (1.0f / kMetersPerInch));
 }
-inline float CMathlib::INCH2METER(float x) {
-  return (float)(x * (mathlib::kMetersPerInch / 1.0f));
+inline float INCH2METER(float x) {
+  return (float)(x * (kMetersPerInch / 1.0f));
 }
-inline void CMathlib::VectorSubtract(vec3_t a, vec3_t b, vec3_t c) {
+inline void VectorSubtract(vec3_t a, vec3_t b, vec3_t c) {
   (c)[0] = (a)[0] - (b)[0];
   (c)[1] = (a)[1] - (b)[1];
   (c)[2] = (a)[2] - (b)[2];
 }
-inline void CMathlib::VectorAdd(vec3_t a, vec3_t b, vec3_t c) {
+inline void VectorAdd(vec3_t a, vec3_t b, vec3_t c) {
   (c)[0] = (a)[0] + (b)[0];
   (c)[1] = (a)[1] + (b)[1];
   (c)[2] = (a)[2] + (b)[2];
 }
-inline void CMathlib::VectorAddFloat(vec3_t a, float f) {
+inline void VectorAddFloat(vec3_t a, float f) {
   a[0] += f;
   a[1] += f;
   a[2] += f;
 }
-inline void CMathlib::VectorMultiply(vec3_t a, float f) {
+inline void VectorMultiply(vec3_t a, float f) {
   a[0] *= f;
   a[1] *= f;
   a[2] *= f;
 }
-inline void CMathlib::VectorMultipiler(vec3_t a, float f) {
-  VectorMultiply(a, f);
-}
-inline void CMathlib::VectorCopy(const vec3_t src, vec3_t dst) {
+inline void VectorCopy(const vec3_t src, vec3_t dst) {
   (dst)[0] = (src)[0];
   (dst)[1] = (src)[1];
   (dst)[2] = (src)[2];
 }
-inline void CMathlib::VectorReverse(vec3_t a) { VectorInverse(a); }
-inline void CMathlib::Vector2Copy(vec2_t src, vec2_t dst) {
+inline void Vector2Copy(vec2_t src, vec2_t dst) {
   (dst)[0] = (src)[0];
   (dst)[1] = (src)[1];
 }
-inline void CMathlib::Q_Vector2Copy(vec2_t a, vec2_t b) { Vector2Copy(a, b); }
-inline void CMathlib::VectorClear(vec3_t a) {
+inline void VectorClear(vec3_t a) {
   (a)[0] = (a)[1] = (a)[2] = 0.0;
 }
-inline float CMathlib::DotProduct(const vec3_t x, const vec3_t y) {
+inline float DotProduct(const vec3_t x, const vec3_t y) {
   return ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2]);
 }
-inline void CMathlib::ColorApplyAlpha(int &r, int &g, int &b, int a) {
+inline void ColorApplyAlpha(int &r, int &g, int &b, int a) {
   const float alpha = std::clamp(a, 0, 255) / 255.0f;
   r = static_cast<int>(r * alpha);
   g = static_cast<int>(g * alpha);
   b = static_cast<int>(b * alpha);
 }
-inline void CMathlib::ColorCalcuAlpha(int &r, int &g, int &b, int a) {
-  ColorApplyAlpha(r, g, b, a);
-}
-inline std::size_t CMathlib::ScalePixelLength(int contentLength,
+inline std::size_t ScalePixelLength(int contentLength,
                                               double fraction) {
   return static_cast<std::size_t>(
       static_cast<float>(contentLength) *
       std::clamp(static_cast<float>(fraction), 0.0f, 1.0f));
 }
-inline std::size_t CMathlib::GetScreenPixel(int length, double percent) {
-  return ScalePixelLength(length, percent);
-}
-inline void CMathlib::Vector2Rotate(vec2_t out, float x, float y,
+inline void Vector2Rotate(vec2_t out, float x, float y,
                                     float radians) {
   out[0] = x * std::cos(radians) - y * std::sin(radians);
   out[1] = x * std::sin(radians) + y * std::cos(radians);
 }
-inline void CMathlib::ProjectPointOnPlane(vec3_t dst, const vec3_t p,
+inline void ProjectPointOnPlane(vec3_t dst, const vec3_t p,
                                           const vec3_t normal) {
   const float denominator = DotProduct(normal, normal);
   const float d = denominator > 0 ? DotProduct(normal, p) / denominator : 0;
@@ -106,7 +93,7 @@ inline void CMathlib::ProjectPointOnPlane(vec3_t dst, const vec3_t p,
                       p[2] - d * normal[2]};
   VectorCopy(projected, dst);
 }
-inline void CMathlib::PerpendicularVector(vec3_t dst, const vec3_t src) {
+inline void PerpendicularVector(vec3_t dst, const vec3_t src) {
   int pos;
   int i;
   float minelem = 1.0F;
@@ -124,9 +111,9 @@ inline void CMathlib::PerpendicularVector(vec3_t dst, const vec3_t src) {
 
   ProjectPointOnPlane(dst, tempvec, src);
 
-  CMathlib::VectorNormalize(dst);
+  VectorNormalize(dst);
 }
-inline bool CMathlib::PointInQuad(vec2_t p1, vec2_t p2, vec2_t p3, vec2_t p4,
+inline bool PointInQuad(vec2_t p1, vec2_t p2, vec2_t p3, vec2_t p4,
                                   int x, int y) {
   float z1 = (p2[0] - p1[0]) * (y - p1[1]) - (x - p1[0]) * (p2[1] - p1[1]);
   float z2 = (p3[0] - p2[0]) * (y - p2[1]) - (x - p2[0]) * (p3[1] - p2[1]);
@@ -134,15 +121,10 @@ inline bool CMathlib::PointInQuad(vec2_t p1, vec2_t p2, vec2_t p3, vec2_t p4,
   float z4 = (p1[0] - p4[0]) * (y - p4[1]) - (x - p4[0]) * (p1[1] - p4[1]);
   return z1 * z2 > 0 && z3 * z4 > 0 && z1 * z3 > 0;
 }
-inline bool CMathlib::PointInPolygen(vec2_t p1, vec2_t p2, vec2_t p3, vec2_t p4,
-                                     int x, int y) {
-  return PointInQuad(p1, p2, p3, p4, x, y);
-}
-
 // The ABCEnchance original disabled the optimizer for this function to work
 // around a miscompilation. The workaround was removed after re-verifying the
 // result against a Rodrigues reference on MSVC 14.51.
-inline void CMathlib::RotatePointAroundVector(vec3_t dst, const vec3_t dir,
+inline void RotatePointAroundVector(vec3_t dst, const vec3_t dir,
                                               const vec3_t point,
                                               float degrees) {
   float m[3][3];
@@ -158,7 +140,7 @@ inline void CMathlib::RotatePointAroundVector(vec3_t dst, const vec3_t dir,
   vf[2] = dir[2];
 
   PerpendicularVector(vr, dir);
-  CMathlib::CrossProduct(vr, vf, vup);
+  CrossProduct(vr, vf, vup);
 
   m[0][0] = vr[0];
   m[1][0] = vr[1];
@@ -184,30 +166,29 @@ inline void CMathlib::RotatePointAroundVector(vec3_t dst, const vec3_t dir,
   std::memset(zrot, 0, sizeof(zrot));
   zrot[0][0] = zrot[1][1] = zrot[2][2] = 1.0F;
 
-  zrot[0][0] = std::cos(CMathlib::DegToRad(degrees));
-  zrot[0][1] = std::sin(CMathlib::DegToRad(degrees));
-  zrot[1][0] = -std::sin(CMathlib::DegToRad(degrees));
-  zrot[1][1] = std::cos(CMathlib::DegToRad(degrees));
+  zrot[0][0] = std::cos(DegToRad(degrees));
+  zrot[0][1] = std::sin(DegToRad(degrees));
+  zrot[1][0] = -std::sin(DegToRad(degrees));
+  zrot[1][1] = std::cos(DegToRad(degrees));
 
-  CMathlib::R_ConcatRotations(m, zrot, tmpmat);
-  CMathlib::R_ConcatRotations(tmpmat, im, rot);
+  ConcatRotations(m, zrot, tmpmat);
+  ConcatRotations(tmpmat, im, rot);
 
   for (i = 0; i < 3; i++)
     dst[i] = rot[i][0] * point[0] + rot[i][1] * point[1] + rot[i][2] * point[2];
 }
 
 
-inline float CMathlib::AngleMod(float a) {
+inline float AngleMod(float a) {
   a = (360.0f / 65536) * ((int)(a * (65536 / 360.0f)) & 65535);
   return a;
 }
-inline float CMathlib::anglemod(float a) { return AngleMod(a); }
-inline void CMathlib::AngleVectors(const vec3_t angles, vec3_t forward,
+inline void AngleVectors(const vec3_t angles, vec3_t forward,
                                    vec3_t right, vec3_t up) {
   float angle;
   vec2_t cs[3];
   for (int i = 0; i < 3; i++) {
-    angle = angles[i] * mathlib::kDegToRad;
+    angle = angles[i] * kDegToRad;
     cs[i][0] = std::sin(angle);
     cs[i][1] = std::cos(angle);
   }
@@ -228,13 +209,13 @@ inline void CMathlib::AngleVectors(const vec3_t angles, vec3_t forward,
     up[2] = cs[2][1] * cs[0][1];
   }
 }
-inline void CMathlib::AngleVectorsTranspose(const vec3_t angles,
+inline void AngleVectorsTranspose(const vec3_t angles,
                                             vec3_t *forward, vec3_t *right,
                                             vec3_t *up) {
   float angle;
   vec2_t cs[3];
   for (int i = 0; i < 3; i++) {
-    angle = angles[i] * mathlib::kDegToRad;
+    angle = angles[i] * kDegToRad;
     cs[i][0] = std::sin(angle);
     cs[i][1] = std::cos(angle);
   }
@@ -254,7 +235,7 @@ inline void CMathlib::AngleVectorsTranspose(const vec3_t angles,
     (*up)[2] = cs[2][1] * cs[0][1];
   }
 }
-inline void CMathlib::VectorAngles(const vec3_t forward, vec3_t angles) {
+inline void VectorAngles(const vec3_t forward, vec3_t angles) {
   float yaw, pitch;
 
   if (forward[1] == 0 && forward[0] == 0) {
@@ -267,14 +248,14 @@ inline void CMathlib::VectorAngles(const vec3_t forward, vec3_t angles) {
   } else {
     yaw = static_cast<float>(
         std::atan2((double)forward[1], (double)forward[0]) * 180 /
-        mathlib::kPiDouble);
+        kPiDouble);
 
     if (yaw < 0)
       yaw += 360;
 
     float tmp = std::sqrt(forward[0] * forward[0] + forward[1] * forward[1]);
     pitch = static_cast<float>(
-        std::atan2((double)forward[2], (double)tmp) * 180 / mathlib::kPiDouble);
+        std::atan2((double)forward[2], (double)tmp) * 180 / kPiDouble);
 
     if (pitch < 0)
       pitch += 360;
@@ -284,44 +265,42 @@ inline void CMathlib::VectorAngles(const vec3_t forward, vec3_t angles) {
   angles[1] = yaw;
   angles[2] = 0;
 }
-inline float CMathlib::FVectorLength(const vec3_t v) {
+inline float FVectorLength(const vec3_t v) {
   float length = 0;
   for (int i = 0; i < 3; i++)
     length += v[i] * v[i];
   return std::sqrt(length);
 }
-inline double CMathlib::VectorLength(const vec3_t v) {
+inline double VectorLength(const vec3_t v) {
   double length = 0;
   for (int i = 0; i < 3; i++)
     length += static_cast<double>(v[i]) * v[i];
   return std::sqrt(length);
 }
 
-inline int CMathlib::VectorCompare(const vec3_t v1, const vec3_t v2) {
+inline int VectorCompare(const vec3_t v1, const vec3_t v2) {
   for (int i = 0; i < 3; i++) {
-    if (std::abs(v1[i] - v2[i]) > mathlib::kEqualEpsilon)
+    if (std::abs(v1[i] - v2[i]) > kEqualEpsilon)
       return 0;
   }
   return 1;
 }
-inline vec_t CMathlib::RoundHalfUp(vec_t in) {
+inline vec_t RoundHalfUp(vec_t in) {
   return static_cast<float>(std::floor(in + 0.5f));
 }
-inline vec_t CMathlib::Q_rint(vec_t in) { return RoundHalfUp(in); }
-inline void CMathlib::VectorMA(const vec3_t va, float scale, const vec3_t vb,
+inline void VectorMA(const vec3_t va, float scale, const vec3_t vb,
                                vec3_t vc) {
   vc[0] = va[0] + scale * vb[0];
   vc[1] = va[1] + scale * vb[1];
   vc[2] = va[2] + scale * vb[2];
 }
-inline void CMathlib::CrossProduct(const vec3_t v1, const vec3_t v2,
+inline void CrossProduct(const vec3_t v1, const vec3_t v2,
                                    vec3_t cross) {
   cross[0] = v1[1] * v2[2] - v1[2] * v2[1];
   cross[1] = v1[2] * v2[0] - v1[0] * v2[2];
   cross[2] = v1[0] * v2[1] - v1[1] * v2[0];
 }
-inline vec_t CMathlib::Length(const vec3_t v) { return FVectorLength(v); }
-inline vec_t CMathlib::VectorNormalize(vec3_t v) {
+inline vec_t VectorNormalize(vec3_t v) {
   int i = 0;
   double length;
 
@@ -339,33 +318,29 @@ inline vec_t CMathlib::VectorNormalize(vec3_t v) {
 
   return static_cast<float>(length);
 }
-inline void CMathlib::VectorInverse(vec3_t v) {
+inline void VectorInverse(vec3_t v) {
   v[0] = -v[0];
   v[1] = -v[1];
   v[2] = -v[2];
 }
-inline void CMathlib::VectorScale(const vec3_t in, vec_t scale, vec3_t out) {
+inline void VectorScale(const vec3_t in, vec_t scale, vec3_t out) {
   out[0] = in[0] * scale;
   out[1] = in[1] * scale;
   out[2] = in[2] * scale;
 }
-inline int CMathlib::Log2Floor(int val) {
+inline int Log2Floor(int val) {
   if (val <= 0)
     return 0;
   return static_cast<int>(std::bit_width(static_cast<unsigned>(val))) - 1;
 }
-inline int CMathlib::Q_log2(int val) { return Log2Floor(val); }
-inline void CMathlib::ResetBounds(vec3_t mins, vec3_t maxs) {
+inline void ResetBounds(vec3_t mins, vec3_t maxs) {
   mins[0] = mins[1] = mins[2] = 99999;
   maxs[0] = maxs[1] = maxs[2] = -99999;
 }
-inline void CMathlib::ClearBounds(vec3_t mins, vec3_t maxs) {
-  ResetBounds(mins, maxs);
-}
-inline void CMathlib::MatrixCopy(float in[4][3], float out[4][3]) {
+inline void MatrixCopy(float in[4][3], float out[4][3]) {
   std::memcpy(out, in, sizeof(float) * 3 * 4);
 }
-inline void CMathlib::AddPointToBounds(vec3_t v, vec3_t mins, vec3_t maxs) {
+inline void AddPointToBounds(vec3_t v, vec3_t mins, vec3_t maxs) {
   vec_t val;
   for (int i = 0; i < 3; i++) {
     val = v[i];
@@ -377,17 +352,17 @@ inline void CMathlib::AddPointToBounds(vec3_t v, vec3_t mins, vec3_t maxs) {
       maxs[i] = val;
   }
 }
-inline void CMathlib::AngleMatrix(const vec3_t angles, float (*matrix)[4]) {
+inline void AngleMatrix(const vec3_t angles, float (*matrix)[4]) {
   float angle;
   float sr, sp, sy, cr, cp, cy;
 
-  angle = angles[2] * mathlib::kDegToRad;
+  angle = angles[2] * kDegToRad;
   sy = std::sin(angle);
   cy = std::cos(angle);
-  angle = angles[1] * mathlib::kDegToRad;
+  angle = angles[1] * kDegToRad;
   sp = std::sin(angle);
   cp = std::cos(angle);
-  angle = angles[0] * mathlib::kDegToRad;
+  angle = angles[0] * kDegToRad;
   sr = std::sin(angle);
   cr = std::cos(angle);
 
@@ -404,17 +379,17 @@ inline void CMathlib::AngleMatrix(const vec3_t angles, float (*matrix)[4]) {
   matrix[1][3] = 0.0;
   matrix[2][3] = 0.0;
 }
-inline void CMathlib::AngleIMatrix(const vec3_t angles, float matrix[3][4]) {
+inline void AngleIMatrix(const vec3_t angles, float matrix[3][4]) {
   float angle;
   float sr, sp, sy, cr, cp, cy;
 
-  angle = angles[2] * mathlib::kDegToRad;
+  angle = angles[2] * kDegToRad;
   sy = std::sin(angle);
   cy = std::cos(angle);
-  angle = angles[1] * mathlib::kDegToRad;
+  angle = angles[1] * kDegToRad;
   sp = std::sin(angle);
   cp = std::cos(angle);
-  angle = angles[0] * mathlib::kDegToRad;
+  angle = angles[0] * kDegToRad;
   sr = std::sin(angle);
   cr = std::cos(angle);
 
@@ -431,7 +406,7 @@ inline void CMathlib::AngleIMatrix(const vec3_t angles, float matrix[3][4]) {
   matrix[1][3] = 0.0;
   matrix[2][3] = 0.0;
 }
-inline void CMathlib::R_ConcatRotations(float in1[3][3], float in2[3][3],
+inline void ConcatRotations(float in1[3][3], float in2[3][3],
                                         float out[3][3]) {
   out[0][0] =
       in1[0][0] * in2[0][0] + in1[0][1] * in2[1][0] + in1[0][2] * in2[2][0];
@@ -452,30 +427,26 @@ inline void CMathlib::R_ConcatRotations(float in1[3][3], float in2[3][3],
   out[2][2] =
       in1[2][0] * in2[0][2] + in1[2][1] * in2[1][2] + in1[2][2] * in2[2][2];
 }
-inline void CMathlib::R_ConcatTransforms(float in1[3][4], float in2[3][4],
-                                         float out[3][4]) {
-  ConcatTransforms(in1, in2, out);
-}
-inline void CMathlib::VectorRotate(const vec3_t in1, const float in2[3][4],
+inline void VectorRotate(const vec3_t in1, const float in2[3][4],
                                    vec3_t out) {
-  out[0] = CMathlib::DotProduct(in1, in2[0]);
-  out[1] = CMathlib::DotProduct(in1, in2[1]);
-  out[2] = CMathlib::DotProduct(in1, in2[2]);
+  out[0] = DotProduct(in1, in2[0]);
+  out[1] = DotProduct(in1, in2[1]);
+  out[2] = DotProduct(in1, in2[2]);
 }
-inline void CMathlib::VectorIRotate(const vec3_t in1, const float in2[3][4],
+inline void VectorIRotate(const vec3_t in1, const float in2[3][4],
                                     vec3_t out) {
   out[0] = in1[0] * in2[0][0] + in1[1] * in2[1][0] + in1[2] * in2[2][0];
   out[1] = in1[0] * in2[0][1] + in1[1] * in2[1][1] + in1[2] * in2[2][1];
   out[2] = in1[0] * in2[0][2] + in1[1] * in2[1][2] + in1[2] * in2[2][2];
 }
-inline void CMathlib::VectorTransform(const vec3_t in1, float in2[3][4],
+inline void VectorTransform(const vec3_t in1, float in2[3][4],
                                       vec3_t out) {
   out[0] = DotProduct(in1, in2[0]) + in2[0][3];
   out[1] = DotProduct(in1, in2[1]) + in2[1][3];
   out[2] = DotProduct(in1, in2[2]) + in2[2][3];
 }
-inline void CMathlib::AngleQuaternion(const vec3_t angles, vec4_t quaternion) {
-  const float half = 0.5f * mathlib::kDegToRad;
+inline void AngleQuaternion(const vec3_t angles, vec4_t quaternion) {
+  const float half = 0.5f * kDegToRad;
   const float sr = std::sin(angles[2] * half);
   const float cr = std::cos(angles[2] * half);
   const float sp = std::sin(angles[0] * half);
@@ -488,7 +459,7 @@ inline void CMathlib::AngleQuaternion(const vec3_t angles, vec4_t quaternion) {
   quaternion[2] = cr * cp * sy - sr * sp * cy;
   quaternion[3] = cr * cp * cy + sr * sp * sy;
 }
-inline void CMathlib::QuaternionMatrix(const vec4_t quaternion,
+inline void QuaternionMatrix(const vec4_t quaternion,
                                        float (*matrix)[4]) {
   matrix[0][0] = 1.0f - 2.0f * quaternion[1] * quaternion[1] -
                  2.0f * quaternion[2] * quaternion[2];
@@ -511,7 +482,7 @@ inline void CMathlib::QuaternionMatrix(const vec4_t quaternion,
   matrix[2][2] = 1.0f - 2.0f * quaternion[0] * quaternion[0] -
                  2.0f * quaternion[1] * quaternion[1];
 }
-inline void CMathlib::QuaternionSlerp(const vec4_t p, const vec4_t q, float t,
+inline void QuaternionSlerp(const vec4_t p, const vec4_t q, float t,
                                       vec4_t qt) {
   int i;
   float sclp, sclq;
@@ -551,14 +522,14 @@ inline void CMathlib::QuaternionSlerp(const vec4_t p, const vec4_t q, float t,
     qt[1] = p[0];
     qt[2] = -p[3];
     qt[3] = p[2];
-    sclp = std::sin((1.0f - t) * 0.5f * mathlib::kPi);
-    sclq = std::sin(t * 0.5f * mathlib::kPi);
+    sclp = std::sin((1.0f - t) * 0.5f * kPi);
+    sclq = std::sin(t * 0.5f * kPi);
 
     for (i = 0; i < 3; i++)
       qt[i] = sclp * p[i] + sclq * qt[i];
   }
 }
-inline void CMathlib::FloorDivMod(double numer, double denom, int *quotient,
+inline void FloorDivMod(double numer, double denom, int *quotient,
                                   int *rem) {
   int q, r;
   double x;
@@ -581,17 +552,17 @@ inline void CMathlib::FloorDivMod(double numer, double denom, int *quotient,
   *quotient = q;
   *rem = r;
 }
-inline math::DivMod CMathlib::FloorDivMod(double numer, double denom) {
-  math::DivMod result{};
+inline DivMod FloorDivMod(double numer, double denom) {
+  DivMod result{};
   FloorDivMod(numer, denom, &result.quotient, &result.remainder);
   return result;
 }
-inline int CMathlib::GreatestCommonDivisor(int i1, int i2) {
+inline int GreatestCommonDivisor(int i1, int i2) {
   // std::gcd also accepts the negative and zero combinations that made the
   // old recursive Quake implementation recurse forever.
   return std::gcd(i1, i2);
 }
-inline int CMathlib::InvertMatrix(const float *m, float *out) {
+inline int InvertMatrix(const float *m, float *out) {
   using Row = std::array<float, 8>;
   std::array<Row, 4> w{};
   const auto at = [m](int r, int c) { return m[c * 4 + r]; };
@@ -752,7 +723,7 @@ inline int CMathlib::InvertMatrix(const float *m, float *out) {
   return true;
 }
 
-inline void CMathlib::SinCos(float radians, float *sine, float *cosine) {
+inline void SinCos(float radians, float *sine, float *cosine) {
   *sine = std::sin(radians);
   *cosine = std::cos(radians);
 }
@@ -780,7 +751,7 @@ inline void WriteEntityMatrix(float out[4][4], const vec3_t origin, float scale,
 }
 } // namespace detail
 
-inline void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4],
+inline void Matrix4x4_CreateFromEntity(float out[4][4],
                                                  const vec3_t angles,
                                                  const vec3_t origin,
                                                  float scale) {
@@ -789,24 +760,24 @@ inline void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4],
   float sr = 0.0f, cr = 1.0f;
   float angle;
   if (angles[kRoll]) {
-    angle = angles[kYaw] * mathlib::kDegToRad;
+    angle = angles[kYaw] * kDegToRad;
     SinCos(angle, &sy, &cy);
-    angle = angles[kPitch] * mathlib::kDegToRad;
+    angle = angles[kPitch] * kDegToRad;
     SinCos(angle, &sp, &cp);
-    angle = angles[kRoll] * mathlib::kDegToRad;
+    angle = angles[kRoll] * kDegToRad;
     SinCos(angle, &sr, &cr);
   } else if (angles[kPitch]) {
-    angle = angles[kYaw] * mathlib::kDegToRad;
+    angle = angles[kYaw] * kDegToRad;
     SinCos(angle, &sy, &cy);
-    angle = angles[kPitch] * mathlib::kDegToRad;
+    angle = angles[kPitch] * kDegToRad;
     SinCos(angle, &sp, &cp);
   } else if (angles[kYaw]) {
-    angle = angles[kYaw] * mathlib::kDegToRad;
+    angle = angles[kYaw] * kDegToRad;
     SinCos(angle, &sy, &cy);
   }
   detail::WriteEntityMatrix(out, origin, scale, sy, cy, sp, cp, sr, cr);
 }
-inline void CMathlib::Matrix4x4_ConcatTransforms(float out[4][4],
+inline void Matrix4x4_ConcatTransforms(float out[4][4],
                                                  float in1[4][4],
                                                  float in2[4][4]) {
   float result[4][4] = {};
@@ -821,7 +792,7 @@ inline void CMathlib::Matrix4x4_ConcatTransforms(float out[4][4],
   result[3][3] = 1;
   std::memcpy(out, result, sizeof(result));
 }
-inline void CMathlib::ConcatTransforms(float in1[3][4], float in2[3][4],
+inline void ConcatTransforms(float in1[3][4], float in2[3][4],
                                        float out[3][4]) {
   out[0][0] =
       in1[0][0] * in2[0][0] + in1[0][1] * in2[1][0] + in1[0][2] * in2[2][0];
@@ -848,7 +819,7 @@ inline void CMathlib::ConcatTransforms(float in1[3][4], float in2[3][4],
   out[2][3] = in1[2][0] * in2[0][3] + in1[2][1] * in2[1][3] +
               in1[2][2] * in2[2][3] + in1[2][3];
 }
-inline void CMathlib::RGBToHSV(int r, int g, int b, float &h, float &s,
+inline void RGBToHSV(int r, int g, int b, float &h, float &s,
                                float &v) {
   float fr = r / 255.0f, fg = g / 255.0f, fb = b / 255.0f;
   float maxC = std::max({fr, fg, fb});
@@ -870,7 +841,7 @@ inline void CMathlib::RGBToHSV(int r, int g, int b, float &h, float &s,
   // V
   v = maxC <= 0 ? 0 : maxC;
 }
-inline void CMathlib::HSVToRGB(float h, float s, float v, int &r, int &g,
+inline void HSVToRGB(float h, float s, float v, int &r, int &g,
                                int &b) {
   // h is normalized to [0, 360), s/v to [0, 1].
   h = std::fmod(h, 360.0f);
@@ -917,15 +888,16 @@ inline void CMathlib::HSVToRGB(float h, float s, float v, int &r, int &g,
   g = static_cast<int>((hg + m) * 255);
   b = static_cast<int>((hb + m) * 255);
 }
-inline math::Hsv CMathlib::RGBToHSV(math::Rgb rgb) {
-  math::Hsv hsv{};
+inline Hsv RGBToHSV(Rgb rgb) {
+  Hsv hsv{};
   RGBToHSV(rgb.r, rgb.g, rgb.b, hsv.h, hsv.s, hsv.v);
   return hsv;
 }
-inline math::Rgb CMathlib::HSVToRGB(math::Hsv hsv) {
-  math::Rgb rgb{};
+inline Rgb HSVToRGB(Hsv hsv) {
+  Rgb rgb{};
   HSVToRGB(hsv.h, hsv.s, hsv.v, rgb.r, rgb.g, rgb.b);
   return rgb;
 }
 
+} // namespace math
 } // namespace abc
