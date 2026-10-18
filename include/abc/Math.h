@@ -83,14 +83,6 @@ public:
   static void VectorClear(vec3_t a);
   static float DotProduct(const vec3_t x, const vec3_t y);
   static void ColorCalcuAlpha(int &r, int &g, int &b, int a);
-  template <typename T> static T max3(T a, T b, T c) {
-    return (((a) > ((((b) > (c)) ? (b) : (c)))) ? (a)
-                                                : ((((b) > (c)) ? (b) : (c))));
-  }
-  template <typename T> static T min3(T a, T b, T c) {
-    return (((a) < ((((b) < (c)) ? (b) : (c)))) ? (a)
-                                                : ((((b) < (c)) ? (b) : (c))));
-  }
   static std::size_t GetScreenPixel(int length, double percent);
   static void Vector2Rotate(vec2_t out, float x, float y, float rotate);
 

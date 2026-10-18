@@ -890,24 +890,24 @@ inline void CMathlib::ConcatTransforms(float in1[3][4], float in2[3][4],
 inline void CMathlib::RGBToHSV(int r, int g, int b, float &h, float &s,
                                float &v) {
   float fr = r / 255.0f, fg = g / 255.0f, fb = b / 255.0f;
-  float max = max3(fr, fg, fb);
-  float min = min3(fr, fg, fb);
-  float range = max - min;
+  float maxC = std::max({fr, fg, fb});
+  float minC = std::min({fr, fg, fb});
+  float range = maxC - minC;
   // H
   if (range <= 0)
     h = 0;
-  else if (max == fr)
+  else if (maxC == fr)
     h = 60 * (fg - fb) / range + (g >= b ? 0 : 360);
-  else if (max == fg)
+  else if (maxC == fg)
     h = 60 * (fb - fr) / range + 120;
   else
     h = 60 * (fr - fg) / range + 240;
   if (std::abs(h) >= 360)
     h = static_cast<float>(std::fmod(h, 360));
   // S
-  s = max <= 0 ? 0 : range / max;
+  s = maxC <= 0 ? 0 : range / maxC;
   // V
-  v = max <= 0 ? 0 : max;
+  v = maxC <= 0 ? 0 : maxC;
 }
 inline void CMathlib::HSVToRGB(float h, float s, float v, int &r, int &g,
                                int &b) {
