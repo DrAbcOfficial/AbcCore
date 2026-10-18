@@ -67,10 +67,13 @@ inline void CMathlib::VectorAddFloat(vec3_t a, float f) {
   a[1] += f;
   a[2] += f;
 }
-inline void CMathlib::VectorMultipiler(vec3_t a, float f) {
+inline void CMathlib::VectorMultiply(vec3_t a, float f) {
   a[0] *= f;
   a[1] *= f;
   a[2] *= f;
+}
+inline void CMathlib::VectorMultipiler(vec3_t a, float f) {
+  VectorMultiply(a, f);
 }
 inline void CMathlib::VectorCopy(const vec3_t src, vec3_t dst) {
   (dst)[0] = (src)[0];
@@ -88,11 +91,14 @@ inline void CMathlib::VectorClear(vec3_t a) {
 inline float CMathlib::DotProduct(const vec3_t x, const vec3_t y) {
   return ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2]);
 }
-inline void CMathlib::ColorCalcuAlpha(int &r, int &g, int &b, int a) {
+inline void CMathlib::ColorApplyAlpha(int &r, int &g, int &b, int a) {
   const float alpha = std::clamp(a, 0, 255) / 255.0f;
   r = static_cast<int>(r * alpha);
   g = static_cast<int>(g * alpha);
   b = static_cast<int>(b * alpha);
+}
+inline void CMathlib::ColorCalcuAlpha(int &r, int &g, int &b, int a) {
+  ColorApplyAlpha(r, g, b, a);
 }
 inline std::size_t CMathlib::GetScreenPixel(int length, double percent) {
   return (std::size_t)((float)length *
@@ -131,13 +137,17 @@ inline void CMathlib::PerpendicularVector(vec3_t dst, const vec3_t src) {
 
   CMathlib::VectorNormalize(dst);
 }
-inline bool CMathlib::PointInPolygen(vec2_t p1, vec2_t p2, vec2_t p3, vec2_t p4,
-                                     int x, int y) {
+inline bool CMathlib::PointInQuad(vec2_t p1, vec2_t p2, vec2_t p3, vec2_t p4,
+                                  int x, int y) {
   float z1 = (p2[0] - p1[0]) * (y - p1[1]) - (x - p1[0]) * (p2[1] - p1[1]);
   float z2 = (p3[0] - p2[0]) * (y - p2[1]) - (x - p2[0]) * (p3[1] - p2[1]);
   float z3 = (p4[0] - p3[0]) * (y - p3[1]) - (x - p3[0]) * (p4[1] - p3[1]);
   float z4 = (p1[0] - p4[0]) * (y - p4[1]) - (x - p4[0]) * (p1[1] - p4[1]);
   return z1 * z2 > 0 && z3 * z4 > 0 && z1 * z3 > 0;
+}
+inline bool CMathlib::PointInPolygen(vec2_t p1, vec2_t p2, vec2_t p3, vec2_t p4,
+                                     int x, int y) {
+  return PointInQuad(p1, p2, p3, p4, x, y);
 }
 
 #ifdef _WIN32
@@ -204,10 +214,11 @@ inline void CMathlib::RotatePointAroundVector(vec3_t dst, const vec3_t dir,
 #pragma optimize("", on)
 #endif
 
-inline float CMathlib::anglemod(float a) {
+inline float CMathlib::AngleMod(float a) {
   a = (360.0f / 65536) * ((int)(a * (65536 / 360.0f)) & 65535);
   return a;
 }
+inline float CMathlib::anglemod(float a) { return AngleMod(a); }
 inline void CMathlib::AngleVectors(const vec3_t angles, vec3_t forward,
                                    vec3_t right, vec3_t up) {
   float angle;

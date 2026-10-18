@@ -75,6 +75,8 @@ public:
   static void VectorSubtract(vec3_t a, vec3_t b, vec3_t c);
   static void VectorAdd(vec3_t a, vec3_t b, vec3_t c);
   static void VectorAddFloat(vec3_t a, float f);
+  static void VectorMultiply(vec3_t a, float f);
+  // Legacy misspelling.
   static void VectorMultipiler(vec3_t a, float f);
   static void VectorCopy(const vec3_t src, vec3_t dst);
   // Legacy alias for VectorInverse.
@@ -82,6 +84,8 @@ public:
   static void Q_Vector2Copy(vec2_t a, vec2_t b);
   static void VectorClear(vec3_t a);
   static float DotProduct(const vec3_t x, const vec3_t y);
+  static void ColorApplyAlpha(int &r, int &g, int &b, int a);
+  // Legacy misspelling.
   static void ColorCalcuAlpha(int &r, int &g, int &b, int a);
   static std::size_t GetScreenPixel(int length, double percent);
   static void Vector2Rotate(vec2_t out, float x, float y, float rotate);
@@ -157,8 +161,13 @@ public:
   static void VectorIRotate(const vec3_t in1, const float in2[3][4],
                             vec3_t out);
 
+  static bool PointInQuad(vec2_t p1, vec2_t p2, vec2_t p3, vec2_t p4, int x,
+                          int y);
+  // Legacy misspelling.
   static bool PointInPolygen(vec2_t p1, vec2_t p2, vec2_t p3, vec2_t p4, int x,
                              int y);
+  static float AngleMod(float a);
+  // Legacy spelling.
   static float anglemod(float a);
 
   static void ConcatTransforms(float in1[3][4], float in2[3][4],
