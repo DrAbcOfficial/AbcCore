@@ -39,10 +39,6 @@ using vec4 = float[4];
 using ivec4 = int[4];
 using uvec4 = unsigned int[4];
 
-using fixed4_t = int;
-using fixed8_t = int;
-using fixed16_t = int;
-
 namespace abc {
 
 namespace mathlib {
@@ -58,18 +54,6 @@ inline constexpr float kMetersPerInch = 0.0254f;
 [[deprecated("use kPiDouble")]] inline constexpr double Q_PI = kPiDouble;
 [[deprecated("use kMetersPerInch")]] inline constexpr float METERS_PER_INCH =
     kMetersPerInch;
-
-const double DOUBLE_PI = 2 * 3.14159265358979323846;
-const float COLINEAR_EPSILON = 0.001f;
-const int MAX_PLAYER_NAME_LENGTH = 128;
-const double RADIAN_PER_DEGREE = 57.29577951308232087684;
-const double DEGREE_PER_RADIAN = 0.017453292519943295769;
-const float PERIGON_ANGLE = 360.0f;
-const double SQRT_TWO = 1.414213562373095048801;
-const double SQRT_THREE = 1.732050807568877293527;
-const float FLAT_ANGLE = 180.0f;
-const vec3_t vecZero = {0, 0, 0};
-const int nanmask = 255 << 23;
 } // namespace mathlib
 
 class CMathlib {
