@@ -157,8 +157,8 @@ public:
 
   static void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right,
                            vec3_t up);
-  // Legacy compatibility name: currently identical orientation to AngleVectors,
-  // NOT a mathematical transpose. Dormant; do not use as an inverse matrix.
+  // GoldSrc transpose: forward/right/up are the rows of the rotation matrix
+  // produced by Matrix4x4_CreateFromEntity for the same angles.
   static void AngleVectorsTranspose(const vec3_t angles, vec3_t *forward,
                                     vec3_t *right, vec3_t *up);
   static void AngleMatrix(const vec3_t angles, float (*matrix)[4]);

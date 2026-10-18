@@ -244,19 +244,17 @@ inline void CMathlib::AngleVectorsTranspose(const vec3_t angles,
   }
   if (forward) {
     (*forward)[0] = cs[0][1] * cs[1][1];
-    (*forward)[1] = cs[0][1] * cs[1][0];
-    (*forward)[2] = -cs[0][0];
+    (*forward)[1] = cs[2][0] * cs[0][0] * cs[1][1] + cs[2][1] * -cs[1][0];
+    (*forward)[2] = cs[2][1] * cs[0][0] * cs[1][1] + -cs[2][0] * -cs[1][0];
   }
   if (right) {
-    (*right)[0] =
-        (-1 * cs[2][0] * cs[0][0] * cs[1][1] + -1 * cs[2][1] * -cs[1][0]);
-    (*right)[1] =
-        (-1 * cs[2][0] * cs[0][0] * cs[1][0] + -1 * cs[2][1] * cs[1][1]);
-    (*right)[2] = -1 * cs[2][0] * cs[0][1];
+    (*right)[0] = cs[0][1] * cs[1][0];
+    (*right)[1] = cs[2][0] * cs[0][0] * cs[1][0] + cs[2][1] * cs[1][1];
+    (*right)[2] = cs[2][1] * cs[0][0] * cs[1][0] + -cs[2][0] * cs[1][1];
   }
   if (up) {
-    (*up)[0] = (cs[2][1] * cs[0][0] * cs[1][1] + -cs[2][0] * -cs[1][0]);
-    (*up)[1] = (cs[2][1] * cs[0][0] * cs[1][0] + -cs[2][0] * cs[1][1]);
+    (*up)[0] = -cs[0][0];
+    (*up)[1] = cs[2][0] * cs[0][1];
     (*up)[2] = cs[2][1] * cs[0][1];
   }
 }
