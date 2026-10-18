@@ -791,8 +791,8 @@ inline int CMathlib::InvertMatrix(const float *m, float *out) {
 #undef SWAP_ROWS
 }
 inline void CMathlib::SinCos(float radians, float *sine, float *cosine) {
-  *sine = sinf(radians);
-  *cosine = cosf(radians);
+  *sine = std::sin(radians);
+  *cosine = std::cos(radians);
 }
 inline void CMathlib::Matrix4x4_CreateFromEntity(float out[4][4],
                                                  const vec3_t angles,
