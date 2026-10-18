@@ -2,7 +2,9 @@
 // Behavior-preserving port; GBK comments translated, boost-style clamp()
 // replaced with std::clamp (identical semantics at these call sites).
 #include <algorithm>
+#include <bit>
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 
 #include <metahook.h>
@@ -12,7 +14,10 @@
 using namespace abc;
 
 bool CMathlib::Q_IS_NAN(float x){
-	return ((*(int*)&x) & mathlib::nanmask) == mathlib::nanmask;
+	// Strict NaN: exponent all ones AND a non-zero mantissa. The old
+	// pointer-pun also reported +/-Inf as NaN and violated strict aliasing.
+	const auto bits = std::bit_cast<std::uint32_t>(x);
+	return (bits & 0x7F800000u) == 0x7F800000u && (bits & 0x007FFFFFu) != 0;
 }
 float CMathlib::Q_DEG2RAD(float a) {
 	return (a * mathlib::F_PI) / 180.0f;
