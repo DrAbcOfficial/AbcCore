@@ -20,6 +20,7 @@ cmake --build --preset win32-debug   # Release: win32-release
 |---|---|
 | `Plugin.h` | Inline `CAbcPluginBase` (IPluginsV4 skeleton, engine-side checks and info) and the setters that copy host state into AbcCore.dll. Each plugin still defines the five metahook globals in its own `src/CoreGlobals.cpp`. |
 | `Format.h` / `NetMsg.h` | Type-safe positional-placeholder formatting (not an RML/command escaper); strict NUL/boundary message reads |
+| `AbcCoreInterface.h` | Valve-style C ABI: `AbcCore_CreateInterface` returns the versioned `AbcCoreApi` function table (interface version `AbcCore_API_001`) |
 | `Parse.h` | Strict, locale-independent `ParseNumber` / `ParseInt` / `ParseFloat` (whole-view consumption, `std::optional` result, no exceptions) |
 | `Console.h` | `ConsolePrint/Warn/Error/Writeline` (through `gEngfuncs.Con_Printf`) |
 | `CvarCmd.h` | `CREATE_CVAR`, `ADD_COMMAND`, `ServerCmd` / `EngineClientCmd`, `abc::SigScan`, `CCvarRegistrar` |
