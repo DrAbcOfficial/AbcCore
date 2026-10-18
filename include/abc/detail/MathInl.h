@@ -312,13 +312,13 @@ inline void CMathlib::VectorAngles(const vec3_t forward, vec3_t angles) {
   angles[1] = yaw;
   angles[2] = 0;
 }
-inline float CMathlib::FVectorLength(vec3_t v) {
+inline float CMathlib::FVectorLength(const vec3_t v) {
   float length = 0;
   for (int i = 0; i < 3; i++)
     length += v[i] * v[i];
   return std::sqrt(length);
 }
-inline double CMathlib::VectorLength(vec3_t v) {
+inline double CMathlib::VectorLength(const vec3_t v) {
   double length = 0;
   for (int i = 0; i < 3; i++)
     length += static_cast<double>(v[i]) * v[i];
@@ -348,18 +348,7 @@ inline void CMathlib::CrossProduct(const vec3_t v1, const vec3_t v2,
   cross[1] = v1[2] * v2[0] - v1[0] * v2[2];
   cross[2] = v1[0] * v2[1] - v1[1] * v2[0];
 }
-inline vec_t CMathlib::Length(const vec3_t v) {
-  int i;
-  float length;
-
-  length = 0;
-
-  for (i = 0; i < 3; i++)
-    length += v[i] * v[i];
-
-  length = std::sqrt(length);
-  return length;
-}
+inline vec_t CMathlib::Length(const vec3_t v) { return FVectorLength(v); }
 inline vec_t CMathlib::VectorNormalize(vec3_t v) {
   int i = 0;
   double length;

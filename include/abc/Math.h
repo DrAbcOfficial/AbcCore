@@ -107,8 +107,8 @@ public:
                        vec3_t vecc);
 
   static int VectorCompare(const vec3_t v1, const vec3_t v2);
-  static float FVectorLength(vec3_t v);
-  static double VectorLength(vec3_t v);
+  static float FVectorLength(const vec3_t v);
+  static double VectorLength(const vec3_t v);
   static void CrossProduct(const vec3_t v1, const vec3_t v2, vec3_t cross);
   static float VectorNormalize(vec3_t v);
   static void VectorInverse(vec3_t v);
@@ -127,6 +127,7 @@ public:
   static vec_t RoundHalfUp(vec_t in);
   // Legacy Quake-prefixed alias.
   static vec_t Q_rint(vec_t in);
+  // Legacy alias for FVectorLength.
   static vec_t Length(const vec3_t v);
   static void AddPointToBounds(vec3_t v, vec3_t mins, vec3_t maxs);
   // Legacy GoldSrc angle order: angles[0] is roll, angles[1] is pitch and
