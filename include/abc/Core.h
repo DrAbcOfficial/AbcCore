@@ -3,8 +3,8 @@
 namespace abc {
 
 // Returns the AbcCore library version string.
-// Note: AbcCore is linked as a static library into each plugin DLL,
-// so every plugin carries its own per-DLL instance of everything in abc::.
+// AbcCore is a shared library (AbcCore.dll); abc:: state is process-wide and
+// the stable plugin-facing surface is the C ABI CreateInterface table.
 const char *CoreVersion();
 
 } // namespace abc

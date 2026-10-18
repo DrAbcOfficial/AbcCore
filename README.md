@@ -1,10 +1,10 @@
 # AbcCore
 
-Shared foundation library (static `abc_core`) for the Sven Co-op / MetaHookSv plugin family; the common dependency of AbcEssential and AbcUi.
+Shared foundation library (`AbcCore.dll`) for the Sven Co-op / MetaHookSv plugin family; the common dependency of AbcEssential and AbcUi.
 
 ## Build
 
-Windows + MSVC, CMake >= 3.24; the shipped presets declare CMake 4.2 and target the "Visual Studio 18 2026" generator, Win32 x86 only, C++20, dynamic CRT (/MD):
+Windows + MSVC, CMake >= 3.24; the shipped presets declare CMake 4.2 and target the "Visual Studio 18 2026" generator, Win32 x86 only, C++20, dynamic CRT (/MD). The target is a DLL named `AbcCore.dll`:
 
 ```bash
 git clone --recursive https://github.com/DrAbcOfficial/AbcCore.git
@@ -18,7 +18,7 @@ cmake --build --preset win32-debug   # Release: win32-release
 
 | Header | Contents |
 |---|---|
-| `Plugin.h` | `CAbcPluginBase` (IPluginsV4 skeleton, engine-side checks and info); the five globals one plugin DLL must define (the four `metahook.h` externs plus `gExportfuncs`) |
+| `Plugin.h` | Inline `CAbcPluginBase` (IPluginsV4 skeleton, engine-side checks and info) and the setters that copy host state into AbcCore.dll. Each plugin still defines the five metahook globals in its own `src/CoreGlobals.cpp`. |
 | `Format.h` / `NetMsg.h` | Type-safe positional-placeholder formatting (not an RML/command escaper); strict NUL/boundary message reads |
 | `Parse.h` | Strict, locale-independent `ParseNumber` / `ParseInt` / `ParseFloat` (whole-view consumption, `std::optional` result, no exceptions) |
 | `Console.h` | `ConsolePrint/Warn/Error/Writeline` (through `gEngfuncs.Con_Printf`) |
@@ -35,6 +35,25 @@ cmake --build --preset win32-debug   # Release: win32-release
 
 AbcCore is renderer-free. The `IMetaRenderer` bridge and the renderer constant tables live in AbcUi, which owns the direct Renderer dependency.
 
+## Dynamic interface
+
+`AbcCore.dll` exports a Valve-style, versioned C ABI factory:
+
+```cpp
+const AbcCoreApi *AbcCore_CreateInterface(const char *name, int *returnCode);
+```
+
+`AbcCoreApi` (in `include/abc/AbcCoreInterface.h`) is a plain function table:
+`size`, `version`, core version, plugin name, and the host-context setters. The
+table is append-only within an interface version, so plugin binaries do not
+depend on C++ class layout, STL types or the MSVC C++ ABI. `CAbcPluginBase`
+resolves the table once and uses it for the lifecycle calls.
+
+The existing C++ utility symbols are still exported with
+`WINDOWS_EXPORT_ALL_SYMBOLS` for in-tree consumers; new cross-DLL surface
+should be appended to the C table instead of adding another exported C++
+symbol.
+
 ## Using AbcCore downstream
 
 ```cmake
@@ -42,7 +61,12 @@ add_subdirectory(thirdparty/AbcCore)
 target_link_libraries(MyPlugin PRIVATE Abc::Core)
 ```
 
-`abc_core` propagates the MetaHook / eventpp / AIGCJson / SteamSDK include paths as PUBLIC; plugin DLLs must not define `g_pInterface`, `gEngfuncs`, `g_pMetaHookAPI`, `g_pMetaSave` or `gExportfuncs` again (`Plugin.cpp` already provides one copy of each). See `include/abc/Plugin.h` for the entry-point pattern and the export macro.
+`abc_core` propagates the MetaHook / eventpp / AIGCJson / SteamSDK include paths
+as PUBLIC. The plugin DLL still defines the five metahook globals in its own
+`src/CoreGlobals.cpp`; `CAbcPluginBase` copies them into AbcCore.dll through
+the exported setters. At runtime place `AbcCore.dll` where the loader resolves
+it (the aggregate package uses `svencoop/metahook/dlls/AbcCore/`). See
+`include/abc/Plugin.h` for the entry-point pattern and the export macro.
 
 ## Submodules
 

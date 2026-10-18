@@ -12,6 +12,7 @@ set(ABC_CORE_SOURCES
     src/Core.cpp
     src/Math.cpp
     src/Plugin.cpp
+    src/AbcCoreInterface.cpp
     src/Console.cpp
     src/CvarCmd.cpp
     src/Task.cpp
@@ -27,8 +28,12 @@ if(ABC_WITH_HTTP)
     message(FATAL_ERROR "ABC_WITH_HTTP is blocked: no pinned matching UtilHTTPClient headers/runtime or verified callback lifetime contract. Resolve CORE-02/03/04 before enabling; an arbitrary ABC_HTTPCLIENT_INCLUDE_DIR is not sufficient.")
 endif()
 
-add_library(abc_core STATIC ${ABC_CORE_SOURCES})
+add_library(abc_core SHARED ${ABC_CORE_SOURCES})
 add_library(Abc::Core ALIAS abc_core)
+set_target_properties(abc_core PROPERTIES
+    OUTPUT_NAME "AbcCore"
+    WINDOWS_EXPORT_ALL_SYMBOLS ON)
+target_compile_definitions(abc_core PRIVATE ABC_CORE_EXPORTS)
 
 target_include_directories(abc_core
     PUBLIC
