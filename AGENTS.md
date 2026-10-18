@@ -20,6 +20,11 @@ cmake --build --preset win32-debug    # Release: win32-release
 
 ## Conventions
 
+- Legacy public naming: UpperCamelCase functions, `C`-prefixed types and `m_`
+  members are kept for ABCEnchance source compatibility. New code uses
+  lowerCamel functions/variables and k-prefixed constants; do not mass-rename
+  the existing surface.
+
 - Naming follows the LLVM style; public APIs live in `include/abc/`, implementations in `src/`, and public headers must be self-contained.
 - AbcCore stays renderer-free: do not add Renderer headers, submodules, include paths or build checks here. `IMetaRenderer` glue belongs to AbcUi under `src/render/`.
 - `cmake/gamedata/` is the self-contained gamedata tooling used by `abc_add_gamedata`; keep it independent of plugin checkouts.
