@@ -131,6 +131,9 @@ public:
   static vec_t Q_rint(vec_t in);
   static vec_t Length(const vec3_t v);
   static void AddPointToBounds(vec3_t v, vec3_t mins, vec3_t maxs);
+  // Legacy GoldSrc angle order: angles[0] is roll, angles[1] is pitch and
+  // angles[2] is yaw. Prefer Matrix4x4_CreateFromEntity for engine
+  // [pitch, yaw, roll] angles.
   static void AngleIMatrix(const vec3_t angles, float matrix[3][4]);
   // Angles are pitch/yaw/roll degrees, matching AngleVectors.
   static void AngleQuaternion(const vec3_t angles, vec4_t quaternion);
@@ -162,6 +165,7 @@ public:
   // produced by Matrix4x4_CreateFromEntity for the same angles.
   static void AngleVectorsTranspose(const vec3_t angles, vec3_t *forward,
                                     vec3_t *right, vec3_t *up);
+  // See AngleIMatrix for the legacy GoldSrc angle order.
   static void AngleMatrix(const vec3_t angles, float (*matrix)[4]);
   static void VectorTransform(const vec3_t in1, float in2[3][4], vec3_t out);
 
