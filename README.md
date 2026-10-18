@@ -4,7 +4,7 @@ Shared foundation library (static `abc_core`) for the Sven Co-op / MetaHookSv pl
 
 ## Build
 
-Windows + MSVC, CMake >= 4.2 (the default presets target the "Visual Studio 18 2026" generator), Win32 x86 only, C++20, static CRT:
+Windows + MSVC, CMake >= 4.2 (the default presets target the "Visual Studio 18 2026" generator), Win32 x86 only, C++20, dynamic CRT (/MD):
 
 ```bash
 git clone --recursive https://github.com/DrAbcOfficial/AbcCore.git

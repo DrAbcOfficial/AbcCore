@@ -11,7 +11,7 @@ Guidance for AI/automation collaborators working in this repository. Read `READM
 
 ## Build
 
-Win32 x86 only / C++20 / static CRT:
+Win32 x86 only / C++20 / dynamic CRT (/MD):
 
 ```bash
 cmake --preset win32-debug
