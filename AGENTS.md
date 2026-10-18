@@ -20,6 +20,11 @@ cmake --build --preset win32-debug    # Release: win32-release
 
 ## Conventions
 
+- Public headers expose their contract types (`AIGCJson` for `Config`,
+  eventpp for `Events`, SteamSDK for `SteamId`); this is intentional. New
+  headers still include the standard headers they use directly.
+- C-style casts remain in ABCEnchance-derived code; new code uses named casts.
+
 - Legacy public naming: UpperCamelCase functions, `C`-prefixed types and `m_`
   members are kept for ABCEnchance source compatibility. New code uses
   lowerCamel functions/variables and k-prefixed constants; do not mass-rename
