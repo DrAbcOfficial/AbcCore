@@ -8,7 +8,9 @@
 
 namespace {
 
-const char *ApiVersion() { return abc::CoreVersion(); }
+const char *ApiVersion() {
+  return abc::CoreVersion();
+}
 
 void SetContextThunk(void *metaApi, void *interfacePtr, void *save) {
   abc::SetCoreContext(static_cast<metahook_api_t *>(metaApi),
@@ -25,14 +27,19 @@ void SetClientExportFuncsThunk(void *exportFuncs) {
 }
 
 const AbcCoreApi kApi = {
-    sizeof(AbcCoreApi), 1u, ApiVersion, abc::SetPluginName,
-    SetContextThunk,    SetEngineFuncsThunk, SetClientExportFuncsThunk,
+    sizeof(AbcCoreApi),
+    1u,
+    ApiVersion,
+    abc::SetPluginName,
+    SetContextThunk,
+    SetEngineFuncsThunk,
+    SetClientExportFuncsThunk,
 };
 
 } // namespace
 
-extern "C" ABC_CORE_API const AbcCoreApi *AbcCore_CreateInterface(const char *name,
-                                                          int *returnCode) {
+extern "C" ABC_CORE_API const AbcCoreApi *
+AbcCore_CreateInterface(const char *name, int *returnCode) {
   if (returnCode)
     *returnCode = 1;
   if (!name || std::strcmp(name, ABC_CORE_INTERFACE_VERSION) != 0)
