@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <limits>
 #include <numeric>
 #include <utility>
 
@@ -300,7 +299,7 @@ inline double CMathlib::VectorLength(const vec3_t v) {
 
 inline int CMathlib::VectorCompare(const vec3_t v1, const vec3_t v2) {
   for (int i = 0; i < 3; i++) {
-    if (std::abs(v1[i] - v2[i]) > std::numeric_limits<float>::epsilon())
+    if (std::abs(v1[i] - v2[i]) > mathlib::kEqualEpsilon)
       return 0;
   }
   return 1;

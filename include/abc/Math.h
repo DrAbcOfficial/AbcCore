@@ -59,6 +59,7 @@ inline constexpr double kPiDouble = std::numbers::pi;
 inline constexpr float kDegToRad = std::numbers::pi_v<float> / 180.0f;
 inline constexpr float kRadToDeg = 180.0f / std::numbers::pi_v<float>;
 inline constexpr float kMetersPerInch = 0.0254f;
+inline constexpr float kEqualEpsilon = 0.001f;
 
 // Legacy spellings retained for source compatibility; new code should use the
 // k-prefixed constants above.
@@ -120,7 +121,7 @@ public:
   static void VectorMA(const vec3_t veca, float scale, const vec3_t vecb,
                        vec3_t vecc);
 
-  // Element-wise absolute comparison against float epsilon (not HLSDK 0.001).
+  // Element-wise absolute comparison against HLSDK EQUAL_EPSILON (0.001).
   static int VectorCompare(const vec3_t v1, const vec3_t v2);
   // Single-precision length.
   static float FVectorLength(const vec3_t v);
@@ -241,6 +242,7 @@ public:
 namespace abc {
 namespace math {
 using mathlib::kDegToRad;
+using mathlib::kEqualEpsilon;
 using mathlib::kMetersPerInch;
 using mathlib::kPi;
 using mathlib::kPiDouble;
