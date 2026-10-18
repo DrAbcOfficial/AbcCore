@@ -9,10 +9,13 @@
 // §4.11), so GameDir()/ModPath() resolve against the process CWD; the host
 // game must be launched with the game root as CWD (the fixed launch in 08 §3).
 
+#include <abc/AbcCoreInterface.h>
+
 #include <string>
 
 namespace abc {
 
+#ifdef ABC_CORE_EXPORTS
 // Engine mod directory (g_pMetaHookAPI->GetGameDirectory), cached.
 const char *GameDir();
 // Trusted local paths only (not server/user input): absolute paths/.. are
@@ -25,5 +28,27 @@ bool EnsureDir(const char *relativeDir);
 bool EnsureParentDir(const char *relativeFilePath);
 // True when the engine filesystem can see "<relativePath>"; warns when missing.
 bool CheckAsset(const char *relativePath);
+#else
+inline const char *GameDir() {
+  return AbcCoreApiTable()->GameDir();
+}
+inline std::string ModPath(const char *relativePath) {
+  const AbcCoreApi *api = AbcCoreApiTable();
+  const unsigned long long size = api->ModPath(relativePath, nullptr, 0);
+  std::string out(static_cast<std::size_t>(size), '\0');
+  if (size != 0)
+    api->ModPath(relativePath, out.data(), size + 1);
+  return out;
+}
+inline bool EnsureDir(const char *relativeDir) {
+  return AbcCoreApiTable()->EnsureDir(relativeDir) != 0;
+}
+inline bool EnsureParentDir(const char *relativeFilePath) {
+  return AbcCoreApiTable()->EnsureParentDir(relativeFilePath) != 0;
+}
+inline bool CheckAsset(const char *relativePath) {
+  return AbcCoreApiTable()->CheckAsset(relativePath) != 0;
+}
+#endif
 
 } // namespace abc

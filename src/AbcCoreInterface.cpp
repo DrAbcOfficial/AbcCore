@@ -1,7 +1,10 @@
 // Valve-style C ABI entry for AbcCore.dll - see AbcCoreInterface.h.
 #include <abc/AbcCoreInterface.h>
 
+#include <abc/Console.h>
 #include <abc/Core.h>
+#include <abc/CvarCmd.h>
+#include <abc/Paths.h>
 #include <abc/Plugin.h>
 
 #include <cstring>

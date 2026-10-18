@@ -18,25 +18,16 @@ void ConsoleVPrint(const char *Prefix, const char *Fmt, va_list Args) {
 
 } // namespace
 
-void ConsolePrint(const char *fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
+void ConsolePrintV(const char *fmt, va_list args) {
   ConsoleVPrint("", fmt, args);
-  va_end(args);
 }
 
-void ConsoleWarn(const char *fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
+void ConsoleWarnV(const char *fmt, va_list args) {
   ConsoleVPrint("[abc] WARNING: ", fmt, args);
-  va_end(args);
 }
 
-void ConsoleError(const char *fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
+void ConsoleErrorV(const char *fmt, va_list args) {
   ConsoleVPrint("[abc] ERROR: ", fmt, args);
-  va_end(args);
 }
 
 void ConsoleWriteline(const char *text) {

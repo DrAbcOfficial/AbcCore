@@ -9,6 +9,9 @@
 // Platform header first (cvar_callback_t lives here) - the header must be
 // self-sufficient, consumers must not rely on including metahook.h first.
 #include <metahook.h>
+
+#include <abc/AbcCoreInterface.h>
+
 #include <cvardef.h>
 
 namespace abc {
@@ -18,6 +21,7 @@ namespace abc {
 constexpr int FCVAR_VALUE =
     (FCVAR_PRINTABLEONLY | FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 
+#ifdef ABC_CORE_EXPORTS
 void ADD_COMMAND(const char *cmd, void (*pfnEngSrc_function)(void));
 
 cvar_t *CVAR_GET_POINTER(const char *x);
@@ -25,15 +29,43 @@ float CVAR_GET_FLOAT(const char *x);
 const char *CVAR_GET_STRING(const char *x);
 void CVAR_SET_STRING(const char *x, const char *v);
 void CVAR_SET_FLOAT(const char *x, float v);
-// Registers a client cvar; when callback != nullptr it is wired through
-// g_pMetaHookAPI->RegisterCvarCallback.
 cvar_t *CREATE_CVAR(const char *name, const char *val, int flag,
                     cvar_callback_t callback);
 
 void ServerCmd(const char *x);
 void EngineClientCmd(const char *x);
-void PlaySoundByName(const char *x, float volum);
-float ClientTime();
+#else
+inline void ADD_COMMAND(const char *cmd, void (*fn)(void)) {
+  if (const AbcCoreApi *api = AbcCoreApiTable())
+    api->AddCommand(cmd, fn);
+}
+inline cvar_t *CVAR_GET_POINTER(const char *name) {
+  return static_cast<cvar_t *>(AbcCoreApiTable()->CvarGetPointer(name));
+}
+inline float CVAR_GET_FLOAT(const char *name) {
+  return AbcCoreApiTable()->CvarGetFloat(name);
+}
+inline const char *CVAR_GET_STRING(const char *name) {
+  return AbcCoreApiTable()->CvarGetString(name);
+}
+inline void CVAR_SET_STRING(const char *name, const char *value) {
+  AbcCoreApiTable()->CvarSetString(name, value);
+}
+inline void CVAR_SET_FLOAT(const char *name, float value) {
+  AbcCoreApiTable()->CvarSetFloat(name, value);
+}
+inline cvar_t *CREATE_CVAR(const char *name, const char *value, int flags,
+                           cvar_callback_t callback) {
+  return static_cast<cvar_t *>(AbcCoreApiTable()->CreateCvar(
+      name, value, flags, reinterpret_cast<void (*)(void *)>(callback)));
+}
+inline void ServerCmd(const char *command) {
+  AbcCoreApiTable()->ServerCmd(command);
+}
+inline void EngineClientCmd(const char *command) {
+  AbcCoreApiTable()->EngineClientCmd(command);
+}
+#endif
 
 // Thin wrappers over g_pMetaHookAPI->SearchPattern / ReverseSearchPattern.
 // The sig-scan call sites themselves belong to the feature plugins (old
@@ -42,6 +74,8 @@ void *SigScan(void *startSearch, unsigned long searchLen, const char *pattern,
               unsigned long patternLen);
 void *SigScanReverse(void *startSearch, unsigned long searchLen,
                      const char *pattern, unsigned long patternLen);
+void PlaySoundByName(const char *x, float volum);
+float ClientTime();
 
 // Central client-cvar registry for debugging/auditing. Registration is optional
 // (plain CREATE_CVAR still works); everything created through Create() can be
