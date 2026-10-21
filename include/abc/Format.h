@@ -53,6 +53,10 @@ inline std::string FormatValue(const T &value)
 
 template <typename... Args>
 inline std::string Format(std::string_view fmt, Args &&...args) {
+  // Common case (a literal line with no placeholder): do not materialize a
+  // string for every argument. Only a '{' can start a substitution.
+  if (fmt.find('{') == std::string_view::npos)
+    return std::string(fmt);
   // The trailing sentinel keeps the array legal for the zero-argument call;
   // the index guard below never reaches it.
   const std::string values[] = {
