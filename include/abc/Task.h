@@ -12,6 +12,7 @@
 #include <thread>
 #include <mutex>
 #include <exception>
+#include <type_traits>
 #include <utility>
 
 namespace abc {
@@ -29,6 +30,13 @@ protected:
 };
 
 template <typename Result> class CTaskItem : public ITaskItem {
+  // A void result has no continuation value to pass and no storage for
+  // m_pValue; Add() would otherwise fail deep in std::function with an
+  // inscrutable template error.
+  static_assert(!std::is_void_v<Result>,
+                "CTaskItem<void> is not supported; use CTaskManager::Post() "
+                "for fire-and-forget work");
+
 public:
   CTaskItem(std::function<Result()> &futrue) {
     auto &refB = m_bReady;
