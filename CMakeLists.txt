@@ -16,7 +16,6 @@ set(ABC_CORE_SOURCES
     src/CvarCmd.cpp
     src/Paths.cpp
     src/Platform.cpp
-    src/SteamId.cpp
     src/detail/SteamIdCompat.cpp
 )
 if(ABC_WITH_HTTP)
