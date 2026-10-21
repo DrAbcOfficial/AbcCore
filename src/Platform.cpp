@@ -47,11 +47,18 @@ std::string Win32GetStringValueFromRegistry(HKEY hKey,
   std::string result;
   DWORD size = 0;
   if (RegGetValueA(hKey, subKey.c_str(), valueName.c_str(), RRF_RT_REG_SZ,
-                   nullptr, nullptr, &size) == ERROR_SUCCESS) {
+                   nullptr, nullptr, &size) == ERROR_SUCCESS &&
+      size > 0) {
+    // RRF_RT_REG_SZ reports the byte count including the terminator; a zero
+    // size (or an unset value) must not reach "size - 1" (huge size_t).
     char *buffer = new char[size];
     if (RegGetValueA(hKey, subKey.c_str(), valueName.c_str(), RRF_RT_REG_SZ,
-                     nullptr, buffer, &size) == ERROR_SUCCESS)
-      result = std::string(buffer, size - 1);
+                     nullptr, buffer, &size) == ERROR_SUCCESS &&
+        size > 0) {
+      const size_t length =
+          buffer[size - 1] == '\0' ? size - 1 : size;
+      result.assign(buffer, length);
+    }
     delete[] buffer;
   }
   return result;
@@ -174,6 +181,13 @@ void Sys_GetRegKeyValueUnderRoot(HKEY rootKey, const char *pszSubKey,
   DWORD dwDisposition;
   DWORD dwType;
   DWORD dwSize;
+  // This helper is dormant but wired into the public header: reject the null
+  // and negative-length calls the old body passed straight to snprintf
+  // (a negative int becomes a huge size_t).
+  if (!pszSubKey || !pszElement || !pszReturnString || nReturnLength <= 0)
+    return;
+  if (!pszDefaultValue)
+    pszDefaultValue = "";
   snprintf(pszReturnString, nReturnLength, "%s", pszDefaultValue);
   if (nReturnLength > (int)sizeof(szBuff))
     nReturnLength = (int)sizeof(szBuff); // szBuff below can't hold more
