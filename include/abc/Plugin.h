@@ -118,6 +118,8 @@ public:
     g_pMetaSave = pSave;
     if (const AbcCoreApi *api = CoreApi())
       api->SetContext(pAPI, pInterface, pSave);
+    else
+      ReportMissingCore();
     OnInit();
   }
 
@@ -175,6 +177,18 @@ protected:
   }
 
 private:
+  // A loaded AbcCore.dll that rejects ABC_CORE_INTERFACE_VERSION (a stale
+  // release) leaves CoreApi() null for the whole process. Every C ABI
+  // wrapper degrades to a no-op in that state, so say it once, visibly,
+  // instead of dropping commands and cvars silently.
+  void ReportMissingCore() const {
+    MessageBoxA(nullptr,
+                "AbcCore.dll did not accept the plugin interface version.\n"
+                "Install the matching AbcCore.dll under "
+                "metahook/dlls/AbcCore/ and restart the game.",
+                m_szName, MB_OK | MB_ICONERROR);
+  }
+
   char m_szName[64];
   char m_szVersion[96];
 };

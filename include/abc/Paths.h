@@ -29,11 +29,16 @@ bool EnsureParentDir(const char *relativeFilePath);
 // True when the engine filesystem can see "<relativePath>"; warns when missing.
 bool CheckAsset(const char *relativePath);
 #else
+// Same absent-table policy as CvarCmd.h: empty/false instead of a null
+// dereference; the plug-in base reports the version mismatch once at Init.
 inline const char *GameDir() {
-  return AbcCoreApiTable()->GameDir();
+  const AbcCoreApi *api = AbcCoreApiTable();
+  return api ? api->GameDir() : "";
 }
 inline std::string ModPath(const char *relativePath) {
   const AbcCoreApi *api = AbcCoreApiTable();
+  if (!api)
+    return {};
   const unsigned long long size = api->ModPath(relativePath, nullptr, 0);
   std::string out(static_cast<std::size_t>(size), '\0');
   if (size != 0)
@@ -41,13 +46,16 @@ inline std::string ModPath(const char *relativePath) {
   return out;
 }
 inline bool EnsureDir(const char *relativeDir) {
-  return AbcCoreApiTable()->EnsureDir(relativeDir) != 0;
+  const AbcCoreApi *api = AbcCoreApiTable();
+  return api && api->EnsureDir(relativeDir) != 0;
 }
 inline bool EnsureParentDir(const char *relativeFilePath) {
-  return AbcCoreApiTable()->EnsureParentDir(relativeFilePath) != 0;
+  const AbcCoreApi *api = AbcCoreApiTable();
+  return api && api->EnsureParentDir(relativeFilePath) != 0;
 }
 inline bool CheckAsset(const char *relativePath) {
-  return AbcCoreApiTable()->CheckAsset(relativePath) != 0;
+  const AbcCoreApi *api = AbcCoreApiTable();
+  return api && api->CheckAsset(relativePath) != 0;
 }
 #endif
 

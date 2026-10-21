@@ -39,31 +39,45 @@ inline void ADD_COMMAND(const char *cmd, void (*fn)(void)) {
   if (const AbcCoreApi *api = AbcCoreApiTable())
     api->AddCommand(cmd, fn);
 }
+// Every wrapper degrades to a default when the table is absent (a stale
+// AbcCore.dll whose interface name predates this build). CAbcPluginBase
+// reports the mismatch once at Init; these accessors only avoid the
+// unconditional null dereference the earlier mixed policy produced.
 inline cvar_t *CVAR_GET_POINTER(const char *name) {
-  return static_cast<cvar_t *>(AbcCoreApiTable()->CvarGetPointer(name));
+  const AbcCoreApi *api = AbcCoreApiTable();
+  return api ? static_cast<cvar_t *>(api->CvarGetPointer(name)) : nullptr;
 }
 inline float CVAR_GET_FLOAT(const char *name) {
-  return AbcCoreApiTable()->CvarGetFloat(name);
+  const AbcCoreApi *api = AbcCoreApiTable();
+  return api ? api->CvarGetFloat(name) : 0.0f;
 }
 inline const char *CVAR_GET_STRING(const char *name) {
-  return AbcCoreApiTable()->CvarGetString(name);
+  const AbcCoreApi *api = AbcCoreApiTable();
+  return api ? api->CvarGetString(name) : "";
 }
 inline void CVAR_SET_STRING(const char *name, const char *value) {
-  AbcCoreApiTable()->CvarSetString(name, value);
+  if (const AbcCoreApi *api = AbcCoreApiTable())
+    api->CvarSetString(name, value);
 }
 inline void CVAR_SET_FLOAT(const char *name, float value) {
-  AbcCoreApiTable()->CvarSetFloat(name, value);
+  if (const AbcCoreApi *api = AbcCoreApiTable())
+    api->CvarSetFloat(name, value);
 }
 inline cvar_t *CREATE_CVAR(const char *name, const char *value, int flags,
                            cvar_callback_t callback) {
-  return static_cast<cvar_t *>(AbcCoreApiTable()->CreateCvar(
-      name, value, flags, reinterpret_cast<void (*)(void *)>(callback)));
+  const AbcCoreApi *api = AbcCoreApiTable();
+  return api ? static_cast<cvar_t *>(api->CreateCvar(
+                   name, value, flags,
+                   reinterpret_cast<void (*)(void *)>(callback)))
+             : nullptr;
 }
 inline void ServerCmd(const char *command) {
-  AbcCoreApiTable()->ServerCmd(command);
+  if (const AbcCoreApi *api = AbcCoreApiTable())
+    api->ServerCmd(command);
 }
 inline void EngineClientCmd(const char *command) {
-  AbcCoreApiTable()->EngineClientCmd(command);
+  if (const AbcCoreApi *api = AbcCoreApiTable())
+    api->EngineClientCmd(command);
 }
 #endif
 
