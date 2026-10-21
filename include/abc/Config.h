@@ -83,6 +83,9 @@ inline JsonLoadStatus ReadJsonFileStatus(const char *relativePath,
       size ? g_pFileSystem->Read(text.data(), static_cast<int>(size), file) : 0;
   if (read != static_cast<int>(size) || !g_pFileSystem->IsOk(file))
     return JsonLoadStatus::IoError;
+  // Bounded nesting before rapidjson's recursive descent (see ConfigFile.h).
+  if (detail::JsonNestingExceeds(text))
+    return JsonLoadStatus::Invalid;
   jsonOut = std::move(text);
   return JsonLoadStatus::Success;
 }
