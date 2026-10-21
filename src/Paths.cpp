@@ -4,13 +4,25 @@
 #include <abc/Plugin.h>
 
 #include <filesystem>
+#include <mutex>
 
 namespace abc {
 
-static std::string CachedGameDir;
-static bool WarnedNoGameDir = false;
+namespace {
+
+// Task.h allows worker threads to reach ModPath/EnsureDir/JsonSave, so the
+// lazy cache is written under a lock. The returned pointer is stable once the
+// root is known (the string is never reassigned after that); while the root
+// is still unavailable the callers get a string literal instead of a pointer
+// into the (still empty) cached string.
+std::mutex GameDirMutex;
+std::string CachedGameDir;
+bool WarnedNoGameDir = false;
+
+} // namespace
 
 const char *GameDir() {
+  std::lock_guard<std::mutex> lock(GameDirMutex);
   if (CachedGameDir.empty()) {
     const char *dir =
         g_pMetaHookAPI ? g_pMetaHookAPI->GetGameDirectory() : nullptr;
@@ -23,7 +35,7 @@ const char *GameDir() {
           "GameDir not available yet, path operations are unavailable\n");
     }
   }
-  return CachedGameDir.c_str();
+  return CachedGameDir.empty() ? "" : CachedGameDir.c_str();
 }
 
 std::string ModPath(const char *relativePath) {
