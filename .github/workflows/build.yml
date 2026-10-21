@@ -23,23 +23,23 @@ jobs:
         config: [Debug, Release]
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        # actions/checkout v7.0.1, pinned to its commit.
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           submodules: recursive
 
-      # The runner image ships an older CMake than the project requires; the
-      # newest release number is resolved at run time through the GitHub CLI.
-      - name: Install the latest CMake (resolved through gh)
+      # The runner image ships an older CMake than the project requires. Pin
+      # one release and verify the official SHA-256 before extracting.
+      - name: Install CMake 4.4.4
         shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = gh api repos/Kitware/CMake/releases/latest --jq .tag_name
-          if (-not $tag) { $tag = 'v4.4.4' }
-          $version = $tag.TrimStart('v')
-          $url = "https://github.com/Kitware/CMake/releases/download/$tag/cmake-$version-windows-x86_64.zip"
+          $version = '4.4.4'
+          $sha256 = 'bace36e94b31c68ab6fa295f26dfa11219e0701cf7c94b0284a7d1cb13dac536'
+          $url = "https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version-windows-x86_64.zip"
           Write-Host "Installing CMake $version from $url"
           Invoke-WebRequest -Uri $url -OutFile "$env:RUNNER_TEMP\cmake.zip"
+          $actual = (Get-FileHash -Algorithm SHA256 "$env:RUNNER_TEMP\cmake.zip").Hash.ToLower()
+          if ($actual -ne $sha256) { throw "CMake zip checksum mismatch: $actual" }
           Expand-Archive -Path "$env:RUNNER_TEMP\cmake.zip" -DestinationPath "$env:RUNNER_TEMP\cmake" -Force
           "$env:RUNNER_TEMP\cmake\cmake-$version-windows-x86_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
@@ -51,7 +51,7 @@ jobs:
           $cf = python -c "import clang_format, pathlib; print(pathlib.Path(clang_format.__file__).parent / 'data' / 'bin' / 'clang-format.exe')"
           if (-not (Test-Path $cf)) { throw "clang-format.exe not found at $cf" }
           $files = @(git ls-files '*.cpp' '*.h' | Where-Object {
-            $_ -notmatch '^thirdparty/' -and $_ -notmatch 'RenderCommon\.h$'
+            $_ -notmatch '^thirdparty/'
           })
           if ($files.Count -eq 0) { Write-Host 'no first-party C++ files'; exit 0 }
           & $cf --dry-run --Werror --style=file @files
