@@ -530,7 +530,17 @@ inline void QuaternionSlerp(const vec4_t p, const vec4_t q, float t,
   }
 }
 inline void FloorDivMod(double numer, double denom, int *quotient,
-                                  int *rem) {
+                        int *rem) {
+  // The HLSDK original divides unconditionally; a zero/NaN denominator turns
+  // the floor result into inf/NaN and the int cast is UB. Callers get a
+  // defined zero result instead.
+  if (!std::isfinite(numer) || !std::isfinite(denom) || denom == 0.0) {
+    if (quotient)
+      *quotient = 0;
+    if (rem)
+      *rem = 0;
+    return;
+  }
   int q, r;
   double x;
 
@@ -549,8 +559,10 @@ inline void FloorDivMod(double numer, double denom, int *quotient,
     }
   }
 
-  *quotient = q;
-  *rem = r;
+  if (quotient)
+    *quotient = q;
+  if (rem)
+    *rem = r;
 }
 inline DivMod FloorDivMod(double numer, double denom) {
   DivMod result{};
