@@ -55,8 +55,7 @@ std::string Win32GetStringValueFromRegistry(HKEY hKey,
     if (RegGetValueA(hKey, subKey.c_str(), valueName.c_str(), RRF_RT_REG_SZ,
                      nullptr, buffer, &size) == ERROR_SUCCESS &&
         size > 0) {
-      const size_t length =
-          buffer[size - 1] == '\0' ? size - 1 : size;
+      const size_t length = buffer[size - 1] == '\0' ? size - 1 : size;
       result.assign(buffer, length);
     }
     delete[] buffer;
