@@ -52,6 +52,11 @@ void SetCoreContext(metahook_api_t *pAPI, mh_interface_t *pInterface,
 }
 
 void SetEngineFuncs(cl_enginefunc_t *pEngineFuncs) {
+  // Same null policy as RefreshSharedState() in Plugin.h: the plug-in base
+  // calls this right after Init, but a host that never supplied a context
+  // must not turn into a null dereference.
+  if (!g_pInterface || !g_pMetaHookAPI)
+    return;
   g_pFileSystem = g_pInterface->FileSystem;
   g_iEngineType = g_pMetaHookAPI->GetEngineType();
   g_dwEngineBuildnum = g_pMetaHookAPI->GetEngineBuildnum();
@@ -64,17 +69,22 @@ void SetEngineFuncs(cl_enginefunc_t *pEngineFuncs) {
   g_dwEngineRdataBase = (PVOID)g_pMetaHookAPI->GetSectionByName(
       g_dwEngineBase, ".rdata\x0\x0", &g_dwEngineRdataSize);
 
-  memcpy(&gEngfuncs, pEngineFuncs, sizeof(gEngfuncs));
+  if (pEngineFuncs)
+    memcpy(&gEngfuncs, pEngineFuncs, sizeof(gEngfuncs));
 }
 
 void SetClientExportFuncs(cl_exportfuncs_t *pExportFuncs) {
-  memcpy(&gExportfuncs, pExportFuncs, sizeof(gExportfuncs));
-
+  if (pExportFuncs)
+    memcpy(&gExportfuncs, pExportFuncs, sizeof(gExportfuncs));
+  if (!g_pMetaHookAPI || !g_pMetaHookAPI->GetClientBase)
+    return;
   g_dwClientBase = g_pMetaHookAPI->GetClientBase();
   g_dwClientSize = g_pMetaHookAPI->GetClientSize();
 }
 
 void SysErrorV(const char *fmt, va_list args) {
+  if (!g_pMetaHookAPI)
+    return;
   char buf[1024];
   _vsnprintf_s(buf, sizeof(buf), _TRUNCATE, fmt, args);
   g_pMetaHookAPI->SysError("[%s]: %s", s_szPluginName, buf);
