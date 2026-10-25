@@ -9,6 +9,17 @@ Guidance for AI/automation collaborators working in this repository. Read `READM
 - The README is the single public document; interface or behaviour changes must update it in the same commit.
 - Submodule pins may only point at commits that are already public upstream; confirm the commit is pushed before bumping a pin.
 
+## README
+
+- The README is the single public document and is written for end users.
+- Keep it short: features, installation and user-facing commands or settings
+  only. Do not document architecture, module layout, ABI or interface
+  contracts, design conventions or internal implementation, and never add
+  parenthesised technical remarks.
+- Do not describe changelogs, TODOs or FIXMEs.
+- The only technical content is how to build the dist package, including its
+  prerequisites.
+
 ## Build
 
 Win32 x86 only / C++20 / dynamic CRT (/MD); the target is `AbcCore.dll`
